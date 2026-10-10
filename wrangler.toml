@@ -4,7 +4,7 @@ compatibility_date = "2025-06-01"
 
 [vars]
 # Public address of this worker (shown after the first `wrangler deploy`).
-APP_URL = "https://nexra-connect.YOUR-SUBDOMAIN.workers.dev"
+APP_URL = "https://nexra-connect.nexrallc.workers.dev"
 # The Nexra store (supplier).
 SUPPLIER_SHOP = "h0vzt0-80.myshopify.com"
 STOREFRONT_URL = "https://nexrallc.com"
