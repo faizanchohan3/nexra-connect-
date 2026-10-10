@@ -43,15 +43,27 @@ npm run deploy                                   # prints https://nexra-connect.
 ```
 Put that address in `wrangler.toml` as `APP_URL` and run `npm run deploy` again.
 
-### 3. Configure the app (Partner dashboard → your app → Configuration)
+### 3. Upload the app settings to Shopify
+Everything Shopify needs (URLs, scopes, app proxy, compliance webhooks) is in `shopify.app.toml`.
+1. In `shopify.app.toml`, replace `CLIENT_ID` with the app's Client ID and every `YOUR-WORKER` with your worker address (e.g. `nexra-connect.yourname.workers.dev`).
+2. Run:
+```bash
+npx @shopify/cli@latest app deploy      # log in with your Partner account when asked, choose "Nexra Connect"
+```
+This creates a new app version with these settings and releases it. You can check it in the Partner/Dev Dashboard → your app → **Versions**.
+
+The same settings, if you prefer to enter them by hand:
+
 | Setting | Value |
 |---|---|
-| App URL | `https://nexra-connect.<you>.workers.dev/install` |
-| Allowed redirection URL | `https://nexra-connect.<you>.workers.dev/auth/callback` |
+| App URL | `https://YOUR-WORKER/install` |
+| Allowed redirection URL | `https://YOUR-WORKER/auth/callback` |
 | App proxy → Subpath prefix / Subpath | `apps` / `nexra` |
-| App proxy → Proxy URL | `https://nexra-connect.<you>.workers.dev/proxy` |
-| Compliance webhooks (customer data request, customer redact, shop redact) | `https://nexra-connect.<you>.workers.dev/webhooks/shopify` |
+| App proxy → Proxy URL | `https://YOUR-WORKER/proxy` |
+| Compliance webhooks (customer data request, customer redact, shop redact) | `https://YOUR-WORKER/webhooks/shopify` |
 | Embedded in Shopify admin | Off |
+
+**Protected customer data:** seller orders include the end customer's name and address. In the Partner dashboard → your app → **API access** → **Protected customer data access**, request access and select *Name*, *Email*, *Phone* and *Address*, with the reason "fulfil orders placed in seller stores".
 
 ### 4. Install it on the Nexra store
 Open `https://nexra-connect.<you>.workers.dev/install?shop=h0vzt0-80.myshopify.com` while logged in to the Nexra admin and approve. This lets the app read products and customer plans, create draft orders, and subscribe to product changes.

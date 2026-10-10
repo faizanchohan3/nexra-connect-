@@ -1,0 +1,33 @@
+# Shopify app configuration. Upload it with:
+#   npx @shopify/cli@latest app deploy
+# Replace YOUR-WORKER with the worker address printed by `npm run deploy`
+# (for example nexra-connect.yourname.workers.dev) and CLIENT_ID with the app's Client ID.
+
+client_id = "CLIENT_ID"
+name = "Nexra Connect"
+application_url = "https://YOUR-WORKER/install"
+embedded = false
+
+[access_scopes]
+# The app asks each store for its own scopes during install (see src/shopify.js);
+# this list is the union so Shopify's review sees everything the app can request.
+scopes = "read_customers,read_orders,read_products,write_draft_orders,write_products"
+use_legacy_install_flow = true
+
+[auth]
+redirect_urls = ["https://YOUR-WORKER/auth/callback"]
+
+[webhooks]
+api_version = "2025-07"
+
+  [[webhooks.subscriptions]]
+  compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+  uri = "https://YOUR-WORKER/webhooks/shopify"
+
+[app_proxy]
+url = "https://YOUR-WORKER/proxy"
+prefix = "apps"
+subpath = "nexra"
+
+[pos]
+embedded = false
