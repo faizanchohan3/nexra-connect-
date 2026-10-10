@@ -1,12 +1,18 @@
 {%- comment -%}
   Nexra LLC account links (loaded on every page from snippets/oldIE-js.liquid).
   Logged out: Login / Register / Account links go to /pages/customer-login.
-  Logged in: the header account icon opens a menu with Seller Dashboard, My orders (/pages/my-account) and Log out,
-  and the seller dashboard's top bar gets a Log out button.
+  Logged in: the header account icon opens a menu with Dashboard and Log out. Dashboard opens the
+  Seller Dashboard for sellers and My account (/pages/my-account) for customers. A seller is anyone
+  with a nexra-* plan tag, or who used the seller login or Seller Dashboard on this device.
+  The seller dashboard's top bar gets a Log out button.
   Links marked data-nx-direct are left alone.
 {%- endcomment -%}
 {%- unless customer -%}
 <script>
+  try {
+    if (location.pathname.indexOf('/pages/seller-') === 0) localStorage.setItem('nx-role', 'seller');
+    else if (location.pathname.indexOf('/pages/customer-') === 0) localStorage.setItem('nx-role', 'customer');
+  } catch (err) {}
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[href]');
     if (!a || a.hasAttribute('data-nx-direct')) return;
@@ -20,6 +26,10 @@
   }, true);
 </script>
 {%- else -%}
+{%- assign nx_seller_tag = false -%}
+{%- for t in customer.tags -%}
+  {%- if t == 'nexra-seller' or t == 'nexra-starter' or t == 'nexra-growth' or t == 'nexra-pro' or t == 'nexra-reseller' -%}{%- assign nx_seller_tag = true -%}{%- endif -%}
+{%- endfor -%}
 <style>
   .nx-acct-menu{position:absolute;z-index:9999;min-width:230px;background:#fff;border:1px solid #e3e6ee;border-radius:14px;box-shadow:0 14px 40px rgba(20,30,60,.18);padding:8px;display:none;font-size:14px;text-align:left}
   .nx-acct-menu.on{display:block}
@@ -40,6 +50,13 @@ document.addEventListener('DOMContentLoaded', function () {
   var NAME = {{ customer.first_name | default: customer.name | default: customer.email | json }};
   var EMAIL = {{ customer.email | json }};
   var onDash = location.pathname.indexOf(DASH) === 0;
+  var role = '';
+  try {
+    if (onDash) localStorage.setItem('nx-role', 'seller');
+    role = localStorage.getItem('nx-role') || '';
+  } catch (e) {}
+  var isSeller = {{ nx_seller_tag }} || role === 'seller';
+  var HOME = isSeller ? DASH : '/pages/my-account';
 
   // 1. Seller dashboard page: add Log out to the top bar.
   var topRight = document.querySelector('.nxd-top-right');
@@ -60,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // 2. Everywhere else: turn the header account icon into a menu.
   var ic = {
     dash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
-    bag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>',
     out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>'
   };
   function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
@@ -68,8 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
   menu.className = 'nx-acct-menu';
   menu.innerHTML =
     '<div class="nx-hi"><b>Hi, ' + esc(NAME) + '</b>' + esc(EMAIL) + '</div>' +
-    '<a class="nx-dash" href="' + DASH + '" data-nx-direct>' + ic.dash + 'Seller Dashboard</a>' +
-    '<a href="/pages/my-account" data-nx-direct>' + ic.bag + 'My orders &amp; account</a>' +
+    '<a class="nx-dash" href="' + HOME + '" data-nx-direct>' + ic.dash + 'Dashboard</a>' +
     '<a class="nx-out" href="' + LOGOUT + '" data-nx-direct>' + ic.out + 'Log out</a>';
   document.body.appendChild(menu);
 
@@ -102,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var visible = links.some(function (a) { return a.offsetWidth > 0 || a.offsetHeight > 0; });
   if (!visible) {
     var fab = document.createElement('a');
-    fab.className = 'nx-dash-fab'; fab.href = DASH; fab.setAttribute('data-nx-direct', ''); fab.textContent = 'Seller Dashboard';
+    fab.className = 'nx-dash-fab'; fab.href = HOME; fab.setAttribute('data-nx-direct', ''); fab.textContent = 'Dashboard';
     document.body.appendChild(fab);
   }
 });

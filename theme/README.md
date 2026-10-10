@@ -9,7 +9,7 @@ Copies of the custom files added to the Nexra LLC Shopify theme (based on techma
 | `templates/page.nexra-auth.liquid` | Customer and seller login / sign-up pages (`/pages/customer-login`, `customer-signup`, `seller-login`, `seller-signup`) |
 | `templates/page.my-account.liquid` | My account page (`/pages/my-account`): orders with status and tracking, buy again, profile, seller shortcut |
 | `templates/page.join.liquid` | Customer-or-seller chooser (`/pages/join`) |
-| `snippets/nexra-join-links.liquid` | Sends logged-out Login/Register clicks to the login page; account menu (Seller Dashboard, My orders → `/pages/my-account`, Log out) for logged-in visitors. Included from `snippets/oldIE-js.liquid` |
+| `snippets/nexra-join-links.liquid` | Sends logged-out Login/Register clicks to the login page; account menu with Dashboard (Seller Dashboard for sellers, `/pages/my-account` for customers) and Log out for logged-in visitors. Included from `snippets/oldIE-js.liquid` |
 | `snippets/nexra-account-switch.liquid`, `snippets/nexra-account-banner.liquid` | Customer/seller switch for legacy account pages (unused with new customer accounts) |
 
 The dashboard's direct-import features call `/apps/nexra/api/*`, served by Nexra Connect through a Shopify app proxy (see `../README.md`).
