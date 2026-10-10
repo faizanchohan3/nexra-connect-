@@ -1,8 +1,9 @@
 {%- comment -%}
   Nexra LLC account links (loaded on every page from snippets/oldIE-js.liquid).
   Logged out: Login / Register / Account links go to /pages/customer-login.
-  Logged in: the header account icon opens a menu with Dashboard and Log out. Dashboard opens the
-  Seller Dashboard for sellers and My account (/pages/my-account) for customers. A seller is anyone
+  Logged in: the header account link opens a menu with Dashboard, Settings and Log out. Dashboard opens
+  the Seller Dashboard for sellers and My account (/pages/my-account) for customers; Settings opens the
+  seller's Pricing Rules, or Shopify's secure profile page for customers. A seller is anyone
   with a nexra-* plan tag, or who used the seller login or Seller Dashboard on this device.
   The seller dashboard's top bar gets a Log out button.
   Links marked data-nx-direct are left alone.
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
   } catch (e) {}
   var isSeller = {{ nx_seller_tag }} || role === 'seller';
   var HOME = isSeller ? DASH : '/pages/my-account';
+  var SETTINGS = isSeller ? DASH + '#pricing' : {{ routes.account_url | json }};
 
   // 1. Seller dashboard page: add Log out to the top bar.
   var topRight = document.querySelector('.nxd-top-right');
@@ -77,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 2. Everywhere else: turn the header account icon into a menu.
   var ic = {
     dash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+    gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
     out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>'
   };
   function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
@@ -85,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
   menu.innerHTML =
     '<div class="nx-hi"><b>Hi, ' + esc(NAME) + '</b>' + esc(EMAIL) + '</div>' +
     '<a class="nx-dash" href="' + HOME + '" data-nx-direct>' + ic.dash + 'Dashboard</a>' +
+    '<a href="' + SETTINGS + '" data-nx-direct>' + ic.gear + 'Settings</a>' +
     '<a class="nx-out" href="' + LOGOUT + '" data-nx-direct>' + ic.out + 'Log out</a>';
   document.body.appendChild(menu);
 

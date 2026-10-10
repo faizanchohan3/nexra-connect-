@@ -1,0 +1,133 @@
+{% case section.settings.logo_width %}
+{% when '' %}
+{%- assign image_logo_width = '' -%}
+{%- assign image_logo_height = '' -%}
+{% else %}
+{%- assign image_logo_width = section.settings.logo_width -%}
+{%- assign image_logo_height = '' -%}
+{% endcase %}
+{% capture image_logo_size %}{{ image_logo_width }}x{{ image_logo_height }}{% endcapture %}
+
+{% case section.settings.logo_sticky_width %}
+{% when '' %}
+{%- assign image_logo_sticky_width = '' -%}
+{%- assign image_logo_sticky_height = '' -%}
+{% else %}
+{%- assign image_logo_sticky_width = section.settings.logo_sticky_width -%}
+{%- assign image_logo_sticky_height = '' -%}
+{% endcase %}
+{% capture image_logo_sticky_size %}{{ image_logo_sticky_width }}x{{ image_logo_sticky_height }}{% endcapture %}
+<div class="header-top">
+  <div class="container">
+    <div class="top-right-area">
+      {% if section.settings.show_toplink != blank %}
+      <div class="header-link-area">
+        <ul class="toplink">
+          {% for link in linklists[section.settings.header_toplink].links %}
+          <li>
+            <a href="{{ link.url }}" class="level-top">
+              {% if settings.language_enable %}
+              <span class="lang1">{{ link.title | split: '|' | first }}</span>
+              <span class="lang2">{{ link.title | split: '|' | last }}</span>
+              {% else %}
+              {{ link.title | split: '|' | first }}
+              {% endif %}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      <div class="top-link-area">
+        <ul class="links">
+          {% if customer %}
+          <li class="hidden-xs">
+            <a href="/pages/my-account" data-nx-direct {% if settings.language_enable %}data-translate="header.settings.order"{% endif %}><i class="icon-order-tracking"></i>{{ 'header.settings.order' | t }}</a>
+          </li>
+          <li>{% include 'header-setting' %}</li>
+          {%- comment -%} Nexra: the account name opens the Dashboard / Settings / Log out menu (snippets/nexra-join-links.liquid). {%- endcomment -%}
+          <li class="last">
+            <i class="icon-login-register"></i>
+            <a href="/account" class="nx-acct-trigger">{{ customer.first_name | default: 'My account' }} <i class="icon-angle-down"></i></a>
+          </li>
+          {% else %}
+          <li class="hidden-xs">
+            <a href="/account" {% if settings.language_enable %}data-translate="header.settings.order"{% endif %}><i class="icon-order-tracking"></i>{{ 'header.settings.order' | t }}</a>
+          </li>
+          <li>{% include 'header-setting' %}</li>
+          <li class="last">
+            <i class="icon-login-register"></i>
+            <a href="/account/register" {% if settings.language_enable %}data-translate="header.settings.register"{% endif %}>{{'header.settings.register' | t}}</a> <span {% if settings.language_enable %}data-translate="header.settings.or"{% endif %}>{{'header.settings.or' | t}}</span> <a href="/account/login" {% if settings.language_enable %}data-translate="header.settings.login"{% endif %}>{{'header.settings.login' | t}}</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="header-wrapper">
+  <div class="main-nav">
+    <div class="container">
+      <div id="main-top-nav" class="main-top-nav">
+        {% if section.settings.logo_use_image %}
+        <a href="/" class="logo">
+          {% if section.settings.logo != blank %}
+          {% assign logo = section.settings.logo | img_url: image_logo_size %}
+          {% else %}
+          {% assign logo = 'logo.png' | asset_url %}
+          {% endif %}
+          <img class="x1" src="{{ logo }}" alt="{{ shop.name }}" />
+        </a>
+        {% endif %}
+        <div class="dropdown-menu">
+          <div class="menu-container">
+            <a class="nav-icon" href="javascript:void(0)">
+              <i class="icon-departments-thin"></i>
+            </a>
+            <!-- Main Menu -->
+            {% include 'side-menu' %}
+            <!-- End Main Menu -->
+          </div>
+        </div>
+        <div class="main-nav-right">
+          <div class="cart-area">
+            <div class="mini-cart">
+              {% include 'header-cart' %}
+            </div>
+          </div>
+          {% if section.settings.header_wishlist != blank %}
+          <div class="wishlist-area">
+            <div class="mini-wishlist">
+              {% if customer %}
+              {% assign page_tmp = pages[settings.wishlist_page] %}
+              <a href="{{page_tmp.url}}"><i class="icon-favorites"></i></a>
+              {% else %}
+              <a href="/account/login"><i class="icon-favorites"></i></a>
+              {% endif %}
+            </div>
+          </div>
+          {%endif%}
+          <div class="search-area">
+            <a href="javascript:void(0);" class="search-icon"><span><i class="icon-magnifier"></i></span></a>
+            {% include 'search-bar' %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="top-nav wrapper-top-menu">
+    <div class="container">
+      {% if section.settings.logo_sticky_use_image %}
+      <a href="/" class="logo_sticky">
+        {% if section.settings.logo_sticky != blank %}
+        {% assign logo_sticky = section.settings.logo_sticky | img_url: image_logo_sticky_size %}
+        {% else %}
+        {% assign logo_sticky = 'logo.png' | asset_url %}
+        {% endif %}
+        <img class="x1" src="{{ logo_sticky }}" alt="{{ shop.name }}" />
+      </a>
+      {% endif %}
+      {% include 'main-menu' %}
+    </div>
+  </div>
+</div>
