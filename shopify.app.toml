@@ -1,7 +1,7 @@
 # Shopify app configuration. Upload it with:
 #   npx @shopify/cli@latest app deploy
 # Replace YOUR-WORKER with the worker address printed by `npm run deploy`
-# (for example nexra-connect.yourname.workers.dev) and CLIENT_ID with the app's Client ID.
+# (for example nexra-connect.yourname.workers.dev). The Client ID is already set.
 
 client_id = "b9721439ab32d5045b1a8cdc4b5984f3"
 name = "Nexra Connect"
