@@ -1,0 +1,238 @@
+<!-- /templates/collection.reseller-plans.liquid — Nexra LLC reseller plans: 3 pricing cards + how it works -->
+{% include 'breadcrumb' %}
+<style>
+  .nxp{padding:34px 15px 70px;color:#1b2440}
+  .nxp-head{text-align:center;max-width:720px;margin:0 auto 26px}
+  .nxp-eyebrow{display:inline-block;background:#fdecee;color:#c8101a;font-weight:700;font-size:13px;border-radius:20px;padding:5px 12px;margin-bottom:12px}
+  .nxp-head h1{font-size:36px;font-weight:800;margin:0 0 10px;letter-spacing:-.01em}
+  .nxp-head p{font-size:16px;color:#5b6378;margin:0}
+  .nxp-toggle{display:flex;justify-content:center;align-items:center;gap:10px;margin:22px 0 34px}
+  .nxp-switch{display:inline-flex;background:#f2f4f8;border-radius:30px;padding:4px}
+  .nxp-switch button{border:0;background:transparent;color:#1b2440;font-weight:700;font-size:15px;padding:10px 22px;border-radius:26px;cursor:pointer}
+  .nxp-switch button.on{background:#1b2440;color:#fff}
+  .nxp-save{background:#e7f6ee;color:#0a7a3d;font-weight:700;font-size:12px;border-radius:20px;padding:4px 10px}
+  .nxp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;max-width:1200px;margin:0 auto;align-items:stretch}
+  .nxp-card.free{background:#f7f8fb}
+  .nxp-card.free .nxp-price b{color:#0a7a3d}
+  .nxp-card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid #e3e6ee;border-radius:18px;padding:28px 24px 24px;box-shadow:0 6px 24px rgba(20,30,60,.06)}
+  .nxp-card.pop{border:2px solid #1b2440;box-shadow:0 14px 40px rgba(20,30,60,.16);transform:translateY(-8px)}
+  .nxp-ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:#c8101a;color:#fff;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:20px;padding:5px 14px;white-space:nowrap}
+  .nxp-name{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#c8101a;margin:0 0 6px}
+  .nxp-card h2{font-size:22px;font-weight:800;margin:0 0 6px;color:#1b2440}
+  .nxp-for{font-size:14px;color:#5b6378;margin:0 0 18px;min-height:40px}
+  .nxp-price{display:flex;align-items:baseline;gap:6px;margin:0 0 4px}
+  .nxp-price b{font-size:40px;font-weight:800;line-height:1}
+  .nxp-price span{color:#5b6378;font-size:15px}
+  .nxp-note{font-size:13px;color:#8a91a5;margin:0 0 20px;min-height:18px}
+  .nxp-list{list-style:none;margin:0 0 24px;padding:18px 0 0;border-top:1px solid #eceef3;flex:1}
+  .nxp-list li{position:relative;padding:6px 0 6px 28px;font-size:14.5px;line-height:1.45}
+  .nxp-list li::before{content:"";position:absolute;left:0;top:8px;width:18px;height:18px;border-radius:50%;background:#e7f6ee url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%230a7a3d'%3E%3Cpath d='M8 13.2 4.8 10l-1.1 1.1L8 15.4l8.3-8.3-1.1-1.1z'/%3E%3C/svg%3E") center/14px no-repeat}
+  .nxp-list li b{color:#1b2440}
+  .nxp-btn{display:block;width:100%;border:0;border-radius:12px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;text-align:center;transition:opacity .2s}
+  .nxp-btn:hover{opacity:.9}
+  .nxp-btn.dark{background:#1b2440;color:#fff}
+  .nxp-btn.red{background:#c8101a;color:#fff}
+  .nxp-btn.line{background:#fff;color:#1b2440;border:2px solid #1b2440}
+  .nxp-small{text-align:center;font-size:12.5px;color:#8a91a5;margin:10px 0 0}
+  .nxp-sec{max-width:1080px;margin:60px auto 0}
+  .nxp-sec h2{font-size:26px;font-weight:800;text-align:center;margin:0 0 8px}
+  .nxp-sec > p{text-align:center;color:#5b6378;margin:0 0 26px}
+  .nxp-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+  .nxp-step{background:#f7f8fb;border-radius:14px;padding:18px}
+  .nxp-step i{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#1b2440;color:#fff;font-style:normal;font-weight:800;font-size:14px;margin-bottom:10px}
+  .nxp-step h3{font-size:15px;font-weight:800;margin:0 0 6px;color:#1b2440}
+  .nxp-step p{font-size:13px;line-height:1.5;color:#5b6378;margin:0}
+  .nxp-example{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;background:#1b2440;color:#fff;border-radius:18px;padding:24px;margin-top:22px}
+  .nxp-example div{text-align:center}
+  .nxp-example small{display:block;color:#aab2c5;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+  .nxp-example b{font-size:24px}
+  .nxp-example .gain b{color:#5fd39a}
+  .nxp-example p{grid-column:1/-1;text-align:center;color:#c9cfdd;font-size:13px;margin:6px 0 0}
+  .nxp-faq{max-width:800px;margin:0 auto}
+  .nxp-faq details{border:1px solid #e3e6ee;border-radius:12px;padding:14px 18px;margin-bottom:10px;background:#fff}
+  .nxp-faq summary{font-weight:700;cursor:pointer;list-style:none}
+  .nxp-faq summary::-webkit-details-marker{display:none}
+  .nxp-faq summary::after{content:"+";float:right;font-weight:800;color:#c8101a}
+  .nxp-faq details[open] summary::after{content:"–"}
+  .nxp-faq details p{margin:10px 0 0;color:#5b6378;font-size:14.5px;line-height:1.6}
+  @media (max-width:1199px){
+    .nxp-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:820px}
+    .nxp-card.pop{transform:none}
+  }
+  @media (max-width:991px){
+    .nxp-grid{grid-template-columns:1fr;max-width:480px}
+    .nxp-card.pop{transform:none}
+    .nxp-steps{grid-template-columns:1fr 1fr}
+    .nxp-example{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:767px){
+    .nxp{padding-top:20px}
+    .nxp-head h1{font-size:27px}
+    .nxp-steps{grid-template-columns:1fr}
+  }
+</style>
+
+<div class="container nxp">
+  <div class="nxp-head">
+    <span class="nxp-eyebrow">Nexra Reseller Program</span>
+    <h1>Start your own online business, we do the rest</h1>
+    <p>Pick a plan, import our ready-to-sell products into your Shopify, WooCommerce, eBay or Amazon store, set your own prices and keep the profit. We pack and ship every order to your customers.</p>
+  </div>
+
+  <div class="nxp-toggle">
+    <div class="nxp-switch" role="tablist">
+      <button type="button" class="on" data-nxp-cycle="m">Monthly</button>
+      <button type="button" data-nxp-cycle="y">Yearly</button>
+    </div>
+    <span class="nxp-save">Yearly: 2 months free</span>
+  </div>
+
+  <div class="nxp-grid">
+    <div class="nxp-card free">
+      <p class="nxp-name" style="color:#0a7a3d">Free</p>
+      <h2>Free</h2>
+      <p class="nxp-for">Try Nexra with no card and no commitment.</p>
+      <div class="nxp-price"><b>$0</b><span>/ forever</span></div>
+      <p class="nxp-note">No credit card needed.</p>
+      <ul class="nxp-list">
+        <li>Reseller Dashboard with our <b>full catalog</b></li>
+        <li>Import up to <b>3 products</b></li>
+        <li>Shopify, WooCommerce, eBay &amp; Amazon files</li>
+        <li>Set your own prices</li>
+        <li>Blind shipping to your customer</li>
+      </ul>
+      <a class="nxp-btn line" href="{% if customer %}/pages/reseller-dashboard{% else %}/pages/seller-signup{% endif %}" data-nx-direct style="text-decoration:none">Start free</a>
+      <p class="nxp-small">Upgrade anytime</p>
+    </div>
+    {%- for product in collection.products -%}
+      {%- assign m_var = product.variants.first -%}
+      {%- assign y_var = product.variants.last -%}
+      {%- for v in product.variants -%}
+        {%- if v.title contains 'Month' -%}{%- assign m_var = v -%}{%- endif -%}
+        {%- if v.title contains 'Year' -%}{%- assign y_var = v -%}{%- endif -%}
+      {%- endfor -%}
+      {%- assign m_plan = m_var.selling_plan_allocations.first.selling_plan.id -%}
+      {%- assign y_plan = y_var.selling_plan_allocations.first.selling_plan.id -%}
+      {%- assign y_monthly = y_var.price | divided_by: 12 -%}
+      {%- assign y_saving = m_var.price | times: 12 | minus: y_var.price -%}
+
+      {%- if product.handle contains 'growth' -%}
+        {%- assign tier = 'Growth' -%}{%- assign pop = true -%}{%- assign btn = 'red' -%}
+        {%- assign who = 'For sellers ready to grow with more products and a better cost price.' -%}
+      {%- elsif product.handle contains 'pro' -%}
+        {%- assign tier = 'Pro' -%}{%- assign pop = false -%}{%- assign btn = 'dark' -%}
+        {%- assign who = 'Full A-to-Z service: we set up your store, you focus on selling.' -%}
+      {%- else -%}
+        {%- assign tier = 'Starter' -%}{%- assign pop = false -%}{%- assign btn = 'line' -%}
+        {%- assign who = 'For beginners testing their first products.' -%}
+      {%- endif -%}
+
+      <div class="nxp-card{% if pop %} pop{% endif %}">
+        {%- if pop -%}<span class="nxp-ribbon">Most popular</span>{%- endif -%}
+        <p class="nxp-name">{{ tier }}</p>
+        <h2>{{ product.title | remove: 'Nexra Reseller Plan – ' | remove: 'Nexra Reseller Plan - ' }}</h2>
+        <p class="nxp-for">{{ who }}</p>
+
+        <div class="nxp-price" data-m="{{ m_var.price | money_without_trailing_zeros }}" data-y="{{ y_var.price | money_without_trailing_zeros }}">
+          <b>{{ m_var.price | money_without_trailing_zeros }}</b><span data-per>/ month</span>
+        </div>
+        <p class="nxp-note" data-m="Billed monthly. Cancel anytime." data-y="Only {{ y_monthly | money }}/month. You save {{ y_saving | money_without_trailing_zeros }}.">Billed monthly. Cancel anytime.</p>
+
+        <ul class="nxp-list">
+          {%- case tier -%}
+            {%- when 'Starter' -%}
+              <li>Reseller Dashboard with our <b>full catalog (700+ products)</b></li>
+              <li>Import up to <b>50 products</b> per file</li>
+              <li>Shopify, WooCommerce, eBay &amp; Amazon files</li>
+              <li>Set your own prices (% or fixed markup)</li>
+              <li>Blind shipping to your customer</li>
+              <li>Email support</li>
+            {%- when 'Growth' -%}
+              <li>Everything in Starter, plus:</li>
+              <li>Import up to <b>500 products</b> per file</li>
+              <li><b>5% discount</b> on every order you send us</li>
+              <li>Weekly winning-product picks</li>
+              <li>Priority chat support</li>
+            {%- else -%}
+              <li>Everything in Growth, plus:</li>
+              <li><b>Unlimited</b> product imports</li>
+              <li><b>10% discount</b> on every order you send us</li>
+              <li><b>Done-for-you store setup</b> (products, theme, policies)</li>
+              <li>Dedicated account manager</li>
+          {%- endcase -%}
+        </ul>
+
+        <form method="post" action="{{ routes.cart_add_url }}" class="nxp-form">
+          <input type="hidden" name="id" value="{{ m_var.id }}" data-m="{{ m_var.id }}" data-y="{{ y_var.id }}">
+          {%- if m_plan or y_plan -%}
+          <input type="hidden" name="selling_plan" value="{{ m_plan }}" data-m="{{ m_plan }}" data-y="{{ y_plan }}">
+          {%- endif -%}
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="return_to" value="/checkout">
+          <button type="submit" class="nxp-btn {{ btn }}">Get {{ tier }}</button>
+        </form>
+        <p class="nxp-small">{% if m_plan or y_plan %}Renews automatically · cancel anytime{% else %}Secure checkout{% endif %}</p>
+      </div>
+    {%- else -%}
+      <p style="grid-column:1/-1;text-align:center">Plans are coming soon.</p>
+    {%- endfor -%}
+  </div>
+
+  <div class="nxp-sec">
+    <h2>How it works</h2>
+    <p>Five simple steps from sign-up to your first profit.</p>
+    <div class="nxp-steps">
+      <div class="nxp-step"><i>1</i><h3>Start free or pick a plan</h3><p>Try 3 products free, or choose Starter, Growth or Pro, monthly or yearly.</p></div>
+      <div class="nxp-step"><i>2</i><h3>Open your dashboard</h3><p>Log in and go to your Reseller Dashboard. Access is switched on right after payment.</p></div>
+      <div class="nxp-step"><i>3</i><h3>Import products</h3><p>Select products, set your markup and download the file for Shopify, WooCommerce, eBay or Amazon.</p></div>
+      <div class="nxp-step"><i>4</i><h3>Make a sale</h3><p>Your customer buys from your store at your price. You keep the payment.</p></div>
+      <div class="nxp-step"><i>5</i><h3>We deliver</h3><p>Order the item from us with your customer's address. We ship it in plain packaging.</p></div>
+    </div>
+
+    <div class="nxp-example">
+      <div><small>Our price</small><b>$20</b></div>
+      <div><small>Your markup</small><b>+50%</b></div>
+      <div><small>Your selling price</small><b>$30</b></div>
+      <div class="gain"><small>Your profit</small><b>$10</b></div>
+      <p>Example per sale. On Growth and Pro you also get 5% or 10% off our price, so your profit is even higher.</p>
+    </div>
+  </div>
+
+  <div class="nxp-sec">
+    <h2>Questions</h2>
+    <p>Everything you need to know before you start.</p>
+    <div class="nxp-faq">
+      <details><summary>Do I need my own store?</summary><p>Yes. You need a store on Shopify, WooCommerce, eBay, Amazon or a similar platform. On the Pro plan we help you set up a Shopify store.</p></details>
+      <details><summary>Do I need to buy stock?</summary><p>No. You only pay for a product after your customer has bought it from you. There is no inventory and no warehouse.</p></details>
+      <details><summary>How do I send you an order?</summary><p>From your Reseller Dashboard, click Order next to the product, add it to the cart and check out with your customer's name and address. Growth and Pro members use their discount code at checkout.</p></details>
+      <details><summary>Will my customer see Nexra on the package?</summary><p>No. We ship in plain packaging with no Nexra invoice or branding, so your customer only sees your brand.</p></details>
+      <details><summary>Can I change or cancel my plan?</summary><p>Yes. You can upgrade, downgrade or cancel anytime. Yearly plans include 2 months free.</p></details>
+      <details><summary>Is there a free plan?</summary><p>Yes. Create a seller account and you can import up to 3 products for free, with no card needed. Upgrade whenever you're ready for more.</p></details>
+      <details><summary>Which plan should I pick?</summary><p>Try the Free plan first, then Starter to test more products. Most sellers choose Growth for more imports and the 5% discount. Choose Pro if you want us to build your store for you.</p></details>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var btns = document.querySelectorAll('[data-nxp-cycle]');
+  function setCycle(c) {
+    btns.forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-nxp-cycle') === c); });
+    document.querySelectorAll('.nxp-card').forEach(function (card) {
+      var price = card.querySelector('.nxp-price');
+      if (price && price.hasAttribute('data-m')) {
+        price.querySelector('b').textContent = price.getAttribute('data-' + c);
+        price.querySelector('[data-per]').textContent = c === 'y' ? '/ year' : '/ month';
+      }
+      var note = card.querySelector('.nxp-note');
+      if (note && note.hasAttribute('data-m')) note.textContent = note.getAttribute('data-' + c);
+      card.querySelectorAll('.nxp-form input[data-m]').forEach(function (i) {
+        i.value = i.getAttribute('data-' + c);
+        i.disabled = !i.value;
+      });
+    });
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { setCycle(b.getAttribute('data-nxp-cycle')); }); });
+  setCycle('m');
+});
+</script>

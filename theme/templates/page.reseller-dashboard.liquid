@@ -1,0 +1,1055 @@
+<!-- /templates/page.reseller-dashboard.liquid — Nexra LLC seller dashboard (app layout with sidebar) -->
+{%- assign nx_tier = '' -%}
+{%- assign nx_discount = 0 -%}
+{%- assign nx_limit = 0 -%}
+{%- assign nx_code = '' -%}
+{%- if customer -%}
+  {%- if customer.tags contains 'nexra-pro' -%}
+    {%- assign nx_tier = 'Pro' -%}{%- assign nx_discount = 10 -%}{%- assign nx_limit = 0 -%}{%- assign nx_code = 'NEXRA-PRO' -%}
+  {%- elsif customer.tags contains 'nexra-growth' -%}
+    {%- assign nx_tier = 'Growth' -%}{%- assign nx_discount = 5 -%}{%- assign nx_limit = 500 -%}{%- assign nx_code = 'NEXRA-GROWTH' -%}
+  {%- elsif customer.tags contains 'nexra-starter' or customer.tags contains 'nexra-reseller' -%}
+    {%- assign nx_tier = 'Starter' -%}{%- assign nx_discount = 0 -%}{%- assign nx_limit = 50 -%}
+  {%- else -%}
+    {%- assign nx_tier = 'Free' -%}{%- assign nx_discount = 0 -%}{%- assign nx_limit = 3 -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- if customer == nil -%}
+{% include 'breadcrumb' %}
+<div class="container" style="padding:40px 15px 70px">
+  <div style="max-width:620px;margin:0 auto;text-align:center;background:#fff;border:1px solid #e3e6ee;border-radius:18px;padding:36px 28px;box-shadow:0 6px 24px rgba(20,30,60,.06);color:#1b2440">
+    <h1 style="font-size:28px;font-weight:800;margin:0 0 10px">Nexra Seller Dashboard</h1>
+    <p style="color:#5b6378;margin:0 0 22px">Import our products into your Shopify, WooCommerce, eBay or Amazon store. You set your own prices and we deliver every order.</p>
+    <a href="/pages/seller-login" style="display:inline-block;background:#1b2440;color:#fff;font-weight:800;border-radius:12px;padding:14px 26px;text-decoration:none;margin:4px">Seller log in</a>
+    <a href="/pages/seller-signup" style="display:inline-block;background:#c8101a;color:#fff;font-weight:800;border-radius:12px;padding:14px 26px;text-decoration:none;margin:4px">Start free</a>
+    <p style="color:#8a91a5;font-size:13px;margin:18px 0 0">Start free with 3 products. No card needed. <a href="/collections/nexra-reseller-plans">See all plans</a></p>
+  </div>
+</div>
+{%- else -%}
+
+<style>
+  /* Full-screen app: hide the store's header, breadcrumb and footer on this page only */
+  #shopify-section-header, .box_footer, .main-breadcrumbs, .top-container, #newsletter-popup, .newsletterwrapper { display: none !important; }
+  .main-container, .main-wrapper, .main { padding: 0 !important; margin: 0 !important; }
+  body { background: #f4f5f9 !important; }
+
+  .nxd { --navy:#1b2440; --navy2:#252f52; --red:#c8101a; --green:#0a7a3d; --muted:#5b6378; --line:#e3e6ee; --bg:#f4f5f9;
+    display:flex; min-height:100vh; color:var(--navy); font-size:14.5px; background:var(--bg); text-align:left }
+  .nxd *, .nxd *::before, .nxd *::after { box-sizing:border-box }
+  .nxd a { text-decoration:none }
+
+  /* Sidebar */
+  .nxd-side { width:248px; flex:0 0 248px; background:var(--navy); color:#c9cfdd; display:flex; flex-direction:column; position:sticky; top:0; height:100vh; z-index:20 }
+  .nxd-brand { display:flex; align-items:center; gap:10px; padding:22px 22px 18px; border-bottom:1px solid rgba(255,255,255,.08) }
+  .nxd-brand img { width:38px; height:38px; object-fit:contain; background:#fff; border-radius:9px; padding:3px }
+  .nxd-brand b { display:block; color:#fff; font-size:16px; font-weight:800; line-height:1.1 }
+  .nxd-brand small { color:#8f98b3; font-size:12px }
+  .nxd-nav { padding:14px 12px; flex:1; overflow-y:auto }
+  .nxd-nav-label { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#6f7894; padding:14px 12px 6px }
+  .nxd-nav button { display:flex; align-items:center; gap:12px; width:100%; border:0; background:transparent; color:#c9cfdd; font-size:14.5px; font-weight:600; padding:11px 12px; border-radius:10px; cursor:pointer; text-align:left }
+  .nxd-nav button svg { width:19px; height:19px; flex:0 0 19px; opacity:.85 }
+  .nxd-nav button:hover { background:rgba(255,255,255,.06); color:#fff }
+  .nxd-nav button.on { background:#fff; color:var(--navy) }
+  .nxd-nav button.on svg { opacity:1 }
+  .nxd-nav .nxd-count { margin-left:auto; background:var(--red); color:#fff; font-size:11px; font-weight:800; border-radius:20px; padding:1px 8px }
+  .nxd-side-foot { padding:16px; border-top:1px solid rgba(255,255,255,.08) }
+  .nxd-plan-box { background:var(--navy2); border-radius:12px; padding:14px }
+  .nxd-plan-box b { color:#fff }
+  .nxd-plan-box .nxd-bar { height:6px; background:rgba(255,255,255,.12); border-radius:6px; margin:10px 0 8px; overflow:hidden }
+  .nxd-plan-box .nxd-bar i { display:block; height:100%; background:var(--red); width:0 }
+  .nxd-plan-box a { display:block; text-align:center; background:var(--red); color:#fff; border-radius:9px; padding:9px; font-weight:800; margin-top:10px }
+  .nxd-back { display:block; color:#8f98b3; font-size:13px; padding:12px 6px 0 }
+  .nxd-back:hover { color:#fff }
+
+  /* Main */
+  .nxd-main { flex:1; min-width:0; display:flex; flex-direction:column }
+  .nxd-top { display:flex; align-items:center; gap:14px; background:#fff; border-bottom:1px solid var(--line); padding:14px 28px; position:sticky; top:0; z-index:10 }
+  .nxd-burger { display:none; border:0; background:transparent; cursor:pointer; padding:4px }
+  .nxd-burger svg { width:24px; height:24px }
+  .nxd-top h1 { font-size:20px; font-weight:800; margin:0 }
+  .nxd-top-right { margin-left:auto; display:flex; align-items:center; gap:12px }
+  .nxd-badge { display:inline-block; font-size:12px; font-weight:800; border-radius:20px; padding:4px 11px; background:#eef0f6; color:var(--navy) }
+  .nxd-badge.free { background:#e7f6ee; color:var(--green) }
+  .nxd-badge.paid { background:var(--navy); color:#fff }
+  .nxd-avatar { width:36px; height:36px; border-radius:50%; background:var(--red); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800 }
+  .nxd-user { line-height:1.2 } .nxd-user b { display:block; font-size:14px } .nxd-user small { color:var(--muted); font-size:12px }
+  .nxd-body { padding:26px 28px 60px; max-width:1320px; width:100% }
+  .nxd-view { display:none } .nxd-view.on { display:block }
+
+  /* Building blocks */
+  .nxd-card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:18px }
+  .nxd-card h2 { font-size:17px; font-weight:800; margin:0 0 4px }
+  .nxd-card > p.nxd-sub { color:var(--muted); margin:0 0 16px; font-size:13.5px }
+  .nxd-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-bottom:18px }
+  .nxd-kpi { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; display:flex; gap:14px; align-items:center }
+  .nxd-kpi i { width:44px; height:44px; flex:0 0 44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-style:normal }
+  .nxd-kpi i svg { width:22px; height:22px }
+  .nxd-kpi small { display:block; color:var(--muted); font-size:12.5px; font-weight:600 }
+  .nxd-kpi b { display:block; font-size:24px; font-weight:800; line-height:1.15 }
+  .nxd-grid2 { display:grid; grid-template-columns:3fr 2fr; gap:18px }
+  .nxd-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:40px; padding:0 16px; border-radius:10px; border:0; background:var(--navy); color:#fff !important; font-weight:700; font-size:14px; cursor:pointer; white-space:nowrap }
+  .nxd-btn:hover { opacity:.9 }
+  .nxd-btn.red { background:var(--red) }
+  .nxd-btn.line { background:#fff; color:var(--navy) !important; border:1.5px solid var(--line) }
+  .nxd-btn.line:hover { border-color:var(--navy) }
+  .nxd-btn.sm { height:34px; padding:0 12px; font-size:13px }
+  .nxd-btn[disabled] { opacity:.4; cursor:not-allowed }
+  .nxd-input, .nxd-select { height:40px; border:1.5px solid var(--line); border-radius:10px; padding:0 12px; font-size:14px; color:var(--navy); background:#fff; min-width:0 }
+  .nxd-input:focus, .nxd-select:focus { outline:0; border-color:var(--navy) }
+  .nxd-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px }
+  .nxd-toolbar .nxd-input { flex:1 1 240px }
+  .nxd-muted { color:var(--muted) }
+  .nxd-alert { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; border-radius:12px; padding:14px 18px; margin-bottom:18px; background:#fdecee; border:1px solid #f3b8be }
+  .nxd-alert.info { background:#eef3ff; border-color:#cdd9fb }
+  .nxd-check { list-style:none; margin:0; padding:0 }
+  .nxd-check li { display:flex; gap:12px; align-items:center; padding:11px 0; border-top:1px solid #f0f1f5 }
+  .nxd-check li:first-child { border-top:0 }
+  .nxd-check .dot { width:24px; height:24px; flex:0 0 24px; border-radius:50%; border:2px solid var(--line); display:flex; align-items:center; justify-content:center }
+  .nxd-check li.done .dot { background:var(--green); border-color:var(--green) }
+  .nxd-check li.done .dot::after { content:""; width:6px; height:11px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg) translate(-1px,-1px) }
+  .nxd-check li.done span { color:var(--muted); text-decoration:line-through }
+  .nxd-check li .nxd-btn { margin-left:auto }
+  .nxd-quick { display:grid; grid-template-columns:1fr 1fr; gap:10px }
+  .nxd-quick button { display:flex; flex-direction:column; align-items:flex-start; gap:4px; border:1.5px solid var(--line); background:#fff; border-radius:12px; padding:14px; cursor:pointer; text-align:left; color:var(--navy) }
+  .nxd-quick button:hover { border-color:var(--navy) }
+  .nxd-quick b { font-size:14px } .nxd-quick small { color:var(--muted); font-size:12.5px }
+
+  /* Product cards */
+  .nxd-products { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:16px }
+  .nxd-p { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; transition:box-shadow .2s, transform .2s }
+  .nxd-p:hover { box-shadow:0 10px 26px rgba(20,30,60,.10); transform:translateY(-2px) }
+  .nxd-p-img { position:relative; aspect-ratio:1; background:#f2f3f7 }
+  .nxd-p-img img { width:100%; height:100%; object-fit:cover; display:block }
+  .nxd-p-img .nxd-tag { position:absolute; top:10px; left:10px; background:rgba(27,36,64,.85); color:#fff; font-size:11px; font-weight:700; border-radius:20px; padding:3px 9px; max-width:80%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .nxd-p-body { padding:12px 14px 14px; display:flex; flex-direction:column; flex:1 }
+  .nxd-p-title { font-size:13.5px; font-weight:700; line-height:1.35; height:36px; overflow:hidden; margin:0 0 10px }
+  .nxd-p-nums { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; background:#f7f8fb; border-radius:10px; padding:8px; margin-bottom:12px; text-align:center }
+  .nxd-p-nums small { display:block; font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em }
+  .nxd-p-nums b { font-size:13.5px }
+  .nxd-p-nums .g b { color:var(--green) }
+  .nxd-p-actions { display:flex; gap:8px; margin-top:auto }
+  .nxd-p-actions .nxd-btn { flex:1 }
+  .nxd-p-actions .nxd-btn.added { background:#e7f6ee; color:var(--green) !important }
+  .nxd-pager { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:20px }
+
+  /* Tables */
+  .nxd-table-wrap { overflow-x:auto }
+  .nxd-table { width:100%; border-collapse:collapse; font-size:14px }
+  .nxd-table th { text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); background:#f7f8fb; padding:10px 12px; white-space:nowrap }
+  .nxd-table td { padding:12px; border-top:1px solid #f0f1f5; vertical-align:middle }
+  .nxd-table img { width:48px; height:48px; object-fit:cover; border-radius:8px; background:#f2f3f7; display:block }
+  .nxd-table .num { text-align:right; white-space:nowrap }
+  .nxd-table .g { color:var(--green); font-weight:700 }
+  .nxd-table .nxd-input { height:34px; width:84px }
+  .nxd-pill { display:inline-block; font-size:12px; font-weight:700; border-radius:20px; padding:3px 10px; background:#eef0f6 }
+  .nxd-pill.ok { background:#e7f6ee; color:var(--green) } .nxd-pill.wait { background:#fff4e0; color:#9a5b00 }
+  .nxd-empty { text-align:center; padding:40px 20px; color:var(--muted) }
+  .nxd-empty b { display:block; color:var(--navy); font-size:16px; margin-bottom:6px }
+  .nxd-export { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px }
+  .nxd-export button { border:1.5px solid var(--line); background:#fff; border-radius:12px; padding:16px 12px; cursor:pointer; text-align:center; color:var(--navy) }
+  .nxd-export button:hover { border-color:var(--navy); box-shadow:0 6px 16px rgba(20,30,60,.08) }
+  .nxd-export b { display:block; font-size:15px; margin:6px 0 2px } .nxd-export small { color:var(--muted); font-size:12px }
+  .nxd-export .ic { font-size:22px; font-weight:900; display:inline-flex; width:42px; height:42px; border-radius:10px; align-items:center; justify-content:center; color:#fff }
+  .nxd-form-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px }
+  .nxd-field label { display:block; font-weight:700; font-size:13px; margin-bottom:6px }
+  .nxd-field .nxd-input, .nxd-field .nxd-select { width:100% }
+  .nxd-field small { display:block; color:var(--muted); font-size:12px; margin-top:6px }
+  .nxd-example { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; background:var(--navy); color:#fff; border-radius:12px; padding:16px; margin-top:16px; text-align:center }
+  .nxd-example small { display:block; color:#aab2c5; font-size:11px; text-transform:uppercase; letter-spacing:.05em }
+  .nxd-example b { font-size:20px } .nxd-example .g b { color:#5fd39a }
+  .nxd-plans { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px }
+  .nxd-plan { border:1.5px solid var(--line); border-radius:14px; padding:18px; background:#fff }
+  .nxd-plan.cur { border-color:var(--navy); box-shadow:0 0 0 3px rgba(27,36,64,.08) }
+  .nxd-plan h3 { margin:0 0 4px; font-size:16px; font-weight:800 }
+  .nxd-plan .p { font-size:24px; font-weight:800; margin:6px 0 10px }
+  .nxd-plan ul { margin:0 0 14px; padding-left:18px; color:var(--muted); font-size:13px; line-height:1.7 }
+  .nxd-cycle { display:inline-flex; background:#f2f3f7; border-radius:30px; padding:4px; margin:0 0 16px }
+  .nxd-cycle button { border:0; background:transparent; color:var(--navy); font-weight:700; font-size:14px; padding:8px 18px; border-radius:26px; cursor:pointer }
+  .nxd-cycle button.on { background:var(--navy); color:#fff }
+  .nxd-cycle small { font-size:11px; color:#0a7a3d; font-weight:800 }
+  .nxd-cycle button.on small { color:#5fd39a }
+  .nxd-plan { display:flex; flex-direction:column } .nxd-plan ul { flex:1 }
+  .nxd-steps { margin:0; padding-left:20px; line-height:1.9 }
+  .nxd-connect { display:grid; grid-template-columns:1fr 1fr; gap:18px }
+  .nxd-connect .nxd-card { margin:0 }
+  .nxd-plat { display:flex; align-items:center; gap:12px; margin-bottom:12px }
+  .nxd-plat .ic { width:42px; height:42px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:20px }
+  .nxd-stack { display:flex; flex-direction:column; gap:10px }
+  .nxd-stack .nxd-input { width:100% }
+  .nxd-push { display:flex; flex-wrap:wrap; gap:10px; align-items:center }
+  .nxd-push .nxd-select { min-width:220px }
+  .nxd-progress { height:8px; background:#eef0f6; border-radius:8px; overflow:hidden; margin-top:12px; display:none }
+  .nxd-progress i { display:block; height:100%; width:0; background:var(--green); transition:width .3s }
+  .nxd-note { font-size:13px; color:var(--muted); margin:10px 0 0 }
+  .nxd-results { margin:12px 0 0; padding:0; list-style:none; font-size:13.5px }
+  .nxd-results li { padding:6px 0; border-top:1px solid #f0f1f5 }
+  .nxd-results .bad { color:var(--red) }
+  .nxd-code { font-family:monospace; background:#f2f3f7; border-radius:6px; padding:2px 7px; font-weight:700 }
+  .nxd-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:#fff; padding:12px 20px; border-radius:12px; font-weight:700; box-shadow:0 10px 30px rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:all .25s; z-index:50 }
+  .nxd-toast.on { opacity:1; transform:translateX(-50%) translateY(0) }
+  .nxd-scrim { display:none }
+
+  @media (max-width:1100px) {
+    .nxd-kpis { grid-template-columns:repeat(2,minmax(0,1fr)) }
+    .nxd-grid2 { grid-template-columns:1fr }
+    .nxd-plans, .nxd-export { grid-template-columns:repeat(2,minmax(0,1fr)) }
+  }
+  @media (max-width:860px) {
+    .nxd-side { position:fixed; left:0; top:0; transform:translateX(-100%); transition:transform .25s }
+    .nxd.open .nxd-side { transform:none }
+    .nxd.open .nxd-scrim { display:block; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:15 }
+    .nxd-burger { display:block }
+    .nxd-top { padding:12px 16px } .nxd-body { padding:18px 14px 50px }
+    .nxd-user { display:none }
+    .nxd-form-row, .nxd-quick, .nxd-connect { grid-template-columns:1fr }
+    .nxd-products { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
+    .nxd-example { grid-template-columns:repeat(2,1fr) }
+  }
+  @media (max-width:520px) { .nxd-kpis, .nxd-plans, .nxd-export { grid-template-columns:1fr } }
+</style>
+
+{%- capture ic_home -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>{%- endcapture -%}
+{%- capture ic_box -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>{%- endcapture -%}
+{%- capture ic_list -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v3h16v-3"/></svg>{%- endcapture -%}
+{%- capture ic_store -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-1.5-5h-15z"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg>{%- endcapture -%}
+{%- capture ic_cart -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a1 1 0 0 0 1 .8h9.6a1 1 0 0 0 1-.8L21 7H6"/></svg>{%- endcapture -%}
+{%- capture ic_tag -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>{%- endcapture -%}
+{%- capture ic_card -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>{%- endcapture -%}
+{%- capture ic_link -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>{%- endcapture -%}
+{%- capture ic_help -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></svg>{%- endcapture -%}
+
+<div class="nxd" id="nxd">
+  <div class="nxd-scrim" data-nxd-close></div>
+
+  <aside class="nxd-side">
+    <div class="nxd-brand">
+      <img src="https://cdn.shopify.com/s/files/1/0812/3999/8663/files/Pixabc.com_Removed-bg_Primary_logo_1x_3555a09f-09dd-42be-b66d-c8050d776200.png?width=96" alt="Nexra LLC">
+      <div><b>Nexra</b><small>Seller Center</small></div>
+    </div>
+    <nav class="nxd-nav">
+      <button data-view="overview">{{ ic_home }}Overview</button>
+      <div class="nxd-nav-label">Products</div>
+      <button data-view="catalog">{{ ic_box }}Find Products</button>
+      <button data-view="imports">{{ ic_list }}Import List<span class="nxd-count" id="nxd-nav-count" style="display:none">0</span></button>
+      <button data-view="mine">{{ ic_store }}My Products</button>
+      <button data-view="stores">{{ ic_link }}Connected Stores</button>
+      <div class="nxd-nav-label">Sales</div>
+      <button data-view="orders">{{ ic_cart }}Orders</button>
+      <button data-view="pricing">{{ ic_tag }}Pricing Rules</button>
+      <div class="nxd-nav-label">Account</div>
+      <button data-view="plan">{{ ic_card }}Plan &amp; Billing</button>
+      <button data-view="help">{{ ic_help }}Help Center</button>
+    </nav>
+    <div class="nxd-side-foot">
+      <div class="nxd-plan-box">
+        <b>{{ nx_tier }} plan</b>
+        {%- if nx_tier == 'Free' -%}
+          <div class="nxd-bar"><i id="nxd-usage-bar"></i></div>
+          <small id="nxd-usage-text">0 of 3 free products used</small>
+          <a href="#plan" data-go="plan">Upgrade</a>
+        {%- elsif nx_tier == 'Pro' -%}
+          <div style="font-size:12.5px;margin-top:6px">Unlimited imports · 10% off orders</div>
+        {%- else -%}
+          <div style="font-size:12.5px;margin-top:6px">{{ nx_limit }} products per file{% if nx_discount > 0 %} · {{ nx_discount }}% off orders{% endif %}</div>
+          <a href="#plan" data-go="plan">Upgrade</a>
+        {%- endif -%}
+      </div>
+      <a class="nxd-back" href="/">← Back to store</a>
+    </div>
+  </aside>
+
+  <div class="nxd-main">
+    <header class="nxd-top">
+      <button class="nxd-burger" data-nxd-open aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="#1b2440" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <h1 id="nxd-title">Overview</h1>
+      <div class="nxd-top-right">
+        <span class="nxd-badge {% if nx_tier == 'Free' %}free{% else %}paid{% endif %}">{{ nx_tier }} plan</span>
+        <div class="nxd-avatar">{{ customer.first_name | default: customer.email | slice: 0 | upcase }}</div>
+        <div class="nxd-user"><b>{{ customer.name | default: customer.email }}</b><small>{{ customer.email }}</small></div>
+      </div>
+    </header>
+
+    <div class="nxd-body">
+
+      <!-- OVERVIEW -->
+      <section class="nxd-view" data-view="overview">
+        {%- if nx_tier == 'Free' -%}
+        <div class="nxd-alert">
+          <span><b>You're on the Free plan.</b> Import up to 3 products to try Nexra. Upgrade for up to 500 products per file, unlimited imports and order discounts.</span>
+          <a class="nxd-btn red" href="#plan" data-go="plan">Upgrade plan</a>
+        </div>
+        {%- endif -%}
+        <div class="nxd-kpis">
+          <div class="nxd-kpi"><i style="background:#eef3ff;color:#3b4d82">{{ ic_box }}</i><div><small>Products available</small><b id="nxd-k-total">…</b></div></div>
+          <div class="nxd-kpi"><i style="background:#fdecee;color:#c8101a">{{ ic_list }}</i><div><small>In import list</small><b id="nxd-k-list">0</b></div></div>
+          <div class="nxd-kpi"><i style="background:#e7f6ee;color:#0a7a3d">{{ ic_store }}</i><div><small>Products imported</small><b id="nxd-k-imported">0</b></div></div>
+          <div class="nxd-kpi"><i style="background:#fff4e0;color:#9a5b00">{{ ic_cart }}</i><div><small>Orders placed</small><b>{{ customer.orders_count }}</b></div></div>
+        </div>
+        <div class="nxd-grid2">
+          <div class="nxd-card">
+            <h2>Getting started</h2>
+            <p class="nxd-sub">Complete these steps to make your first sale.</p>
+            <ul class="nxd-check">
+              <li class="done"><i class="dot"></i><span>Create your seller account</span></li>
+              <li id="nxd-ck-pricing"><i class="dot"></i><span>Set your pricing rule</span><button class="nxd-btn sm line" data-go="pricing">Set prices</button></li>
+              <li id="nxd-ck-list"><i class="dot"></i><span>Add products to your import list</span><button class="nxd-btn sm line" data-go="catalog">Find products</button></li>
+              <li id="nxd-ck-export"><i class="dot"></i><span>Export products to your store</span><button class="nxd-btn sm line" data-go="imports">Export</button></li>
+              <li class="{% if customer.orders_count > 0 %}done{% endif %}"><i class="dot"></i><span>Place your first order with us</span><button class="nxd-btn sm line" data-go="help">How it works</button></li>
+            </ul>
+          </div>
+          <div class="nxd-card">
+            <h2>Quick actions</h2>
+            <p class="nxd-sub">Jump straight to what you need.</p>
+            <div class="nxd-quick">
+              <button data-go="catalog"><b>Find products</b><small>Browse the full catalog</small></button>
+              <button data-go="imports"><b>Export to store</b><small>Shopify, Woo, eBay, Amazon</small></button>
+              <button data-go="orders"><b>Track orders</b><small>Status and tracking</small></button>
+              <button data-go="pricing"><b>Pricing rules</b><small>Markup and rounding</small></button>
+            </div>
+          </div>
+        </div>
+        <div class="nxd-card">
+          <h2>Recent orders</h2>
+          <p class="nxd-sub">Orders you've placed with Nexra for your customers.</p>
+          {%- if customer.orders_count > 0 -%}
+          <div class="nxd-table-wrap"><table class="nxd-table">
+            <thead><tr><th>Order</th><th>Date</th><th>Ship to</th><th>Payment</th><th>Delivery</th><th class="num">Total</th></tr></thead>
+            <tbody>
+            {%- for order in customer.orders limit: 5 -%}
+              <tr><td><a href="{{ order.customer_url }}"><b>{{ order.name }}</b></a></td><td>{{ order.created_at | date: '%b %d, %Y' }}</td><td>{{ order.shipping_address.name }}</td>
+              <td><span class="nxd-pill {% if order.financial_status == 'paid' %}ok{% endif %}">{{ order.financial_status_label }}</span></td>
+              <td><span class="nxd-pill {% if order.fulfillment_status == 'fulfilled' %}ok{% else %}wait{% endif %}">{{ order.fulfillment_status_label }}</span></td>
+              <td class="num">{{ order.total_price | money }}</td></tr>
+            {%- endfor -%}
+            </tbody></table></div>
+          {%- else -%}
+          <div class="nxd-empty"><b>No orders yet</b>When you make a sale, order the product here with your customer's address and it shows up in this list.</div>
+          {%- endif -%}
+        </div>
+      </section>
+
+      <!-- FIND PRODUCTS -->
+      <section class="nxd-view" data-view="catalog">
+        <div class="nxd-toolbar">
+          <input class="nxd-input" id="nxd-q" type="search" placeholder="Search 700+ products…">
+          <select class="nxd-select" id="nxd-type"><option value="">All categories</option></select>
+          <select class="nxd-select" id="nxd-sort">
+            <option value="new">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="az">Name A–Z</option>
+          </select>
+        </div>
+        <p class="nxd-muted" id="nxd-result-count" style="margin:0 0 12px">Loading products…</p>
+        <div class="nxd-products" id="nxd-products"></div>
+        <div class="nxd-pager"><button class="nxd-btn line" id="nxd-more" style="display:none">Load more products</button></div>
+      </section>
+
+      <!-- IMPORT LIST -->
+      <section class="nxd-view" data-view="imports">
+        <div class="nxd-card">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div><h2>Import List</h2><p class="nxd-muted" style="margin:0">Review prices, then export to your store. Leave "Markup" empty to use your pricing rule.</p></div>
+            <button class="nxd-btn sm line" id="nxd-clear">Clear list</button>
+          </div>
+          <div class="nxd-table-wrap" style="margin-top:14px"><table class="nxd-table">
+            <thead><tr><th></th><th>Product</th><th class="num">Your cost</th><th>Markup %</th><th class="num">Your price</th><th class="num">Profit</th><th></th></tr></thead>
+            <tbody id="nxd-list-rows"></tbody>
+          </table></div>
+        </div>
+        <div class="nxd-card" id="nxd-push-card">
+          <h2>Push to your store <span class="nxd-pill ok" style="font-size:11px;vertical-align:middle">One click</span></h2>
+          <p class="nxd-sub">Send the products in your Import List straight into your connected Shopify or WooCommerce store, with your prices, images and variants.</p>
+          <div id="nxd-push-ready" style="display:none">
+            <div class="nxd-push">
+              <select class="nxd-select" id="nxd-push-store"></select>
+              <button class="nxd-btn red" id="nxd-push-btn">Push to store</button>
+              <a href="#stores" data-go="stores" class="nxd-btn sm line">Manage stores</a>
+            </div>
+            <div class="nxd-progress" id="nxd-push-progress"><i></i></div>
+            <ul class="nxd-results" id="nxd-push-results"></ul>
+          </div>
+          <div id="nxd-push-nostore" style="display:none">
+            <p style="margin:0 0 12px">Connect your store once, then push products with one click.</p>
+            <a href="#stores" data-go="stores" class="nxd-btn">Connect a store</a>
+          </div>
+          <p class="nxd-note" id="nxd-push-off" style="display:none">One-click push is being set up. You can use the export files below in the meantime.</p>
+        </div>
+        <div class="nxd-card">
+          <h2>Or download a file</h2>
+          <p class="nxd-sub">For eBay, Amazon and other platforms, or if you prefer uploading yourself. Your prices and brand name are already filled in.</p>
+          <div class="nxd-export">
+            <button data-export="shopify"><span class="ic" style="background:#5e8e3e">S</span><b>Shopify</b><small>Products → Import</small></button>
+            <button data-export="woo"><span class="ic" style="background:#7f54b3">W</span><b>WooCommerce</b><small>Products → Import</small></button>
+            <button data-export="ebay"><span class="ic" style="background:#e53238">e</span><b>eBay</b><small>Seller Hub → Uploads</small></button>
+            <button data-export="universal"><span class="ic" style="background:#232f3e">a</span><b>Amazon / Other</b><small>Universal sheet</small></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- MY PRODUCTS -->
+      <section class="nxd-view" data-view="mine">
+        <div class="nxd-card" id="nxd-pushed-card" style="display:none">
+          <h2>In your stores</h2>
+          <p class="nxd-sub">Products pushed to your connected stores. Prices stay in sync automatically.</p>
+          <div class="nxd-table-wrap"><table class="nxd-table">
+            <thead><tr><th></th><th>Product</th><th>Store</th><th>Status</th><th>Updated</th><th></th></tr></thead>
+            <tbody id="nxd-pushed-rows"></tbody>
+          </table></div>
+        </div>
+        <div class="nxd-card">
+          <h2>My Products</h2>
+          <p class="nxd-sub">Products you've exported to your stores. Use Order when one of them sells.</p>
+          <div class="nxd-table-wrap"><table class="nxd-table">
+            <thead><tr><th></th><th>Product</th><th>Exported to</th><th>Date</th><th class="num">Your cost</th><th></th></tr></thead>
+            <tbody id="nxd-mine-rows"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- CONNECTED STORES -->
+      <section class="nxd-view" data-view="stores">
+        <p class="nxd-note" id="nxd-stores-off" style="display:none;margin:0 0 16px">Store connections are being set up. Check back soon. You can still use the export files in your Import List.</p>
+        <div class="nxd-card">
+          <h2>Your stores</h2>
+          <p class="nxd-sub">Products you push go to these stores. Prices update automatically when ours change, and new orders appear under Orders.</p>
+          <div class="nxd-table-wrap"><table class="nxd-table">
+            <thead><tr><th>Store</th><th>Platform</th><th>Products</th><th>Connected</th><th></th></tr></thead>
+            <tbody id="nxd-store-rows"><tr><td colspan="5" class="nxd-muted">Loading…</td></tr></tbody>
+          </table></div>
+        </div>
+        <div class="nxd-connect">
+          <div class="nxd-card">
+            <div class="nxd-plat"><span class="ic" style="background:#5e8e3e">S</span><div><h2 style="margin:0">Connect Shopify</h2><small class="nxd-muted">Takes 30 seconds</small></div></div>
+            <div class="nxd-stack">
+              <input class="nxd-input" id="nxd-shop" placeholder="your-store.myshopify.com" autocomplete="off">
+              <button class="nxd-btn" id="nxd-connect-shopify">Connect Shopify store</button>
+            </div>
+            <p class="nxd-note">You'll approve Nexra in your Shopify admin and come straight back here.</p>
+          </div>
+          <div class="nxd-card">
+            <div class="nxd-plat"><span class="ic" style="background:#7f54b3">W</span><div><h2 style="margin:0">Connect WooCommerce</h2><small class="nxd-muted">Takes 1 minute</small></div></div>
+            <div class="nxd-stack">
+              <input class="nxd-input" id="nxd-woo-url" placeholder="https://your-store.com" autocomplete="off">
+              <input class="nxd-input" id="nxd-woo-key" placeholder="Consumer key (ck_…)" autocomplete="off">
+              <input class="nxd-input" id="nxd-woo-secret" placeholder="Consumer secret (cs_…)" autocomplete="off" type="password">
+              <button class="nxd-btn" id="nxd-connect-woo">Connect WooCommerce store</button>
+            </div>
+            <p class="nxd-note">In WordPress: WooCommerce → Settings → Advanced → REST API → Add key. Choose <b>Read/Write</b>, then paste both keys here.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="nxd-view" data-view="orders">
+        <div class="nxd-card">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+            <div><h2>Orders</h2><p class="nxd-muted" style="margin:0">Every order you place with Nexra. We ship directly to your customer.</p></div>
+            <button class="nxd-btn red" data-go="mine">+ Place new order</button>
+          </div>
+          {%- if customer.orders_count > 0 -%}
+          <div class="nxd-table-wrap" style="margin-top:16px"><table class="nxd-table">
+            <thead><tr><th>Order</th><th>Date</th><th>Ship to</th><th>Items</th><th>Payment</th><th>Delivery</th><th class="num">Total</th><th></th></tr></thead>
+            <tbody>
+            {%- paginate customer.orders by 50 -%}
+            {%- for order in customer.orders -%}
+              <tr><td><b>{{ order.name }}</b></td><td>{{ order.created_at | date: '%b %d, %Y' }}</td>
+              <td>{{ order.shipping_address.name }}<br><small class="nxd-muted">{{ order.shipping_address.city }}{% if order.shipping_address.province_code != blank %}, {{ order.shipping_address.province_code }}{% endif %}</small></td>
+              <td>{{ order.item_count }}</td>
+              <td><span class="nxd-pill {% if order.financial_status == 'paid' %}ok{% endif %}">{{ order.financial_status_label }}</span></td>
+              <td><span class="nxd-pill {% if order.fulfillment_status == 'fulfilled' %}ok{% else %}wait{% endif %}">{{ order.fulfillment_status_label }}</span></td>
+              <td class="num">{{ order.total_price | money }}</td>
+              <td><a class="nxd-btn sm line" href="{{ order.customer_url }}">Details &amp; tracking</a></td></tr>
+            {%- endfor -%}
+            {%- endpaginate -%}
+            </tbody></table></div>
+          {%- else -%}
+          <div class="nxd-empty"><b>No orders yet</b>When one of your products sells, open <b>My Products</b> and click <b>Order</b>.</div>
+          {%- endif -%}
+        </div>
+        <div class="nxd-card" id="nxd-imp-card" style="display:none">
+          <h2>Orders from your stores</h2>
+          <p class="nxd-sub">When a customer buys a Nexra product in your connected store, the order appears here automatically. Click <b>Pay &amp; send</b> and we ship it to your customer.</p>
+          <div class="nxd-table-wrap"><table class="nxd-table">
+            <thead><tr><th>Order</th><th>Store</th><th>Ship to</th><th>Items</th><th>Status</th><th></th></tr></thead>
+            <tbody id="nxd-imp-rows"></tbody>
+          </table></div>
+        </div>
+        <div class="nxd-card">
+          <h2>How to place an order</h2>
+          <ol class="nxd-steps">
+            <li>Your customer buys a product from your store at your price.</li>
+            <li>Open <b>My Products</b> and click <b>Order</b> next to that product, or search it on our store.</li>
+            <li>Add it to the cart while logged in, and at checkout enter <b>your customer's name and address</b>.</li>
+            {%- if nx_code != '' -%}<li>Apply code <span class="nxd-code">{{ nx_code }}</span> for your {{ nx_discount }}% reseller discount.</li>{%- endif -%}
+            <li>Pay. We ship in plain packaging with no Nexra invoice. Tracking appears here.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- PRICING RULES -->
+      <section class="nxd-view" data-view="pricing">
+        <div class="nxd-card">
+          <h2>Pricing rules</h2>
+          <p class="nxd-sub">Applied to every product you export. You can still change single products in the Import List.</p>
+          <div class="nxd-form-row">
+            <div class="nxd-field"><label for="nxd-mtype">Markup type</label>
+              <select class="nxd-select" id="nxd-mtype"><option value="pct">Percentage (%)</option><option value="fixed">Fixed amount ($)</option></select></div>
+            <div class="nxd-field"><label for="nxd-markup">Markup</label>
+              <input class="nxd-input" id="nxd-markup" type="number" min="0" step="1" value="40"><small>Example: 40% turns a $20 product into $28.</small></div>
+            <div class="nxd-field"><label for="nxd-round">Price ending</label>
+              <select class="nxd-select" id="nxd-round"><option value="99">.99 (e.g. $27.99)</option><option value="95">.95 (e.g. $27.95)</option><option value="00">.00 (e.g. $28.00)</option><option value="none">Keep exact price</option></select></div>
+            <div class="nxd-field"><label for="nxd-brand">Your brand name</label>
+              <input class="nxd-input" id="nxd-brand" type="text" placeholder="e.g. My Shop"><small>Used as the vendor/brand in your export files.</small></div>
+          </div>
+          <div class="nxd-example">
+            <div><small>Our price</small><b>$20.00</b></div>
+            <div><small>Your cost</small><b id="nxd-ex-cost">$20.00</b></div>
+            <div><small>Your price</small><b id="nxd-ex-sell">$27.99</b></div>
+            <div class="g"><small>Your profit</small><b id="nxd-ex-profit">$7.99</b></div>
+          </div>
+          <div style="margin-top:16px"><button class="nxd-btn" id="nxd-save-pricing">Save pricing rule</button></div>
+        </div>
+      </section>
+
+      <!-- PLAN & BILLING -->
+      <section class="nxd-view" data-view="plan">
+        <div class="nxd-card">
+          <h2>Your plan: {{ nx_tier }}</h2>
+          <p class="nxd-sub">{% if nx_tier == 'Free' %}Import up to 3 products for free. Upgrade any time.{% elsif nx_tier == 'Pro' %}Unlimited imports and 10% off every order.{% else %}Up to {{ nx_limit }} products per file{% if nx_discount > 0 %} and {{ nx_discount }}% off every order{% endif %}.{% endif %}</p>
+          {%- if nx_code != '' -%}<p>Your reseller discount code: <span class="nxd-code">{{ nx_code }}</span> ({{ nx_discount }}% off every order).</p>{%- endif -%}
+          <div class="nxd-cycle"><button type="button" class="on" data-cycle="m">Monthly</button><button type="button" data-cycle="y">Yearly <small>2 months free</small></button></div>
+          <div class="nxd-plans">
+            <div class="nxd-plan{% if nx_tier == 'Free' %} cur{% endif %}"><h3>Free</h3><div class="p">$0</div><ul><li>3 products</li><li>All 4 export files</li><li>Blind shipping</li></ul>{% if nx_tier == 'Free' %}<span class="nxd-pill ok">Current plan</span>{% endif %}</div>
+            {%- assign plan_handles = 'nexra-reseller-plan-starter,nexra-reseller-plan-growth,nexra-reseller-plan-pro-done-for-you' | split: ',' -%}
+            {%- for h in plan_handles -%}
+              {%- assign pp = all_products[h] -%}
+              {%- if pp.id -%}
+              {%- assign m_var = pp.variants.first -%}{%- assign y_var = pp.variants.last -%}
+              {%- for v in pp.variants -%}{%- if v.title contains 'Month' -%}{%- assign m_var = v -%}{%- endif -%}{%- if v.title contains 'Year' -%}{%- assign y_var = v -%}{%- endif -%}{%- endfor -%}
+              {%- assign m_plan = m_var.selling_plan_allocations.first.selling_plan.id -%}
+              {%- assign y_plan = y_var.selling_plan_allocations.first.selling_plan.id -%}
+              {%- if h contains 'growth' -%}{%- assign t = 'Growth' -%}{%- assign feats = '500 products per file|5% off orders|Priority support' -%}{%- assign bc = 'red' -%}
+              {%- elsif h contains 'pro' -%}{%- assign t = 'Pro' -%}{%- assign feats = 'Unlimited imports|10% off orders|Store setup for you' -%}{%- assign bc = '' -%}
+              {%- else -%}{%- assign t = 'Starter' -%}{%- assign feats = '50 products per file|Email support' -%}{%- assign bc = 'line' -%}{%- endif -%}
+              <div class="nxd-plan{% if nx_tier == t %} cur{% endif %}">
+                <h3>{{ t }}{% if t == 'Growth' %} <span class="nxd-pill" style="background:#fdecee;color:#c8101a;font-size:11px">Popular</span>{% endif %}</h3>
+                <div class="p" data-m="{{ m_var.price | money_without_trailing_zeros }}<small class='nxd-muted' style='font-size:13px'>/mo</small>" data-y="{{ y_var.price | money_without_trailing_zeros }}<small class='nxd-muted' style='font-size:13px'>/yr</small>">{{ m_var.price | money_without_trailing_zeros }}<small class="nxd-muted" style="font-size:13px">/mo</small></div>
+                <ul>{% assign fl = feats | split: '|' %}{% for f in fl %}<li>{{ f }}</li>{% endfor %}</ul>
+                {%- if nx_tier == t -%}<span class="nxd-pill ok">Current plan</span>{%- else -%}
+                <form method="post" action="{{ routes.cart_add_url }}" class="nxd-buy">
+                  <input type="hidden" name="id" value="{{ m_var.id }}" data-m="{{ m_var.id }}" data-y="{{ y_var.id }}">
+                  {%- if m_plan or y_plan -%}<input type="hidden" name="selling_plan" value="{{ m_plan }}" data-m="{{ m_plan }}" data-y="{{ y_plan }}">{%- endif -%}
+                  <input type="hidden" name="quantity" value="1">
+                  <input type="hidden" name="return_to" value="/checkout">
+                  <button type="submit" class="nxd-btn sm {{ bc }}" style="width:100%">{% if nx_tier == 'Free' or t == 'Pro' or nx_tier == 'Starter' and t == 'Growth' %}Upgrade to {{ t }}{% else %}Switch to {{ t }}{% endif %}</button>
+                </form>
+                {%- endif -%}
+              </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+          <p class="nxd-muted" style="margin:16px 0 0;font-size:13px">You go straight to secure checkout. Your new plan is switched on after payment, and your dashboard updates automatically.</p>
+        </div>
+      </section>
+
+      <!-- HELP -->
+      <section class="nxd-view" data-view="help">
+        <div class="nxd-grid2">
+          <div class="nxd-card">
+            <h2>How to import products</h2>
+            <ul class="nxd-steps">
+              <li><b>Shopify:</b> Admin → Products → Import → upload your Shopify file.</li>
+              <li><b>WooCommerce:</b> Products → Import → upload your WooCommerce file. Variants are kept.</li>
+              <li><b>eBay:</b> Seller Hub → Reports → Uploads. Add the eBay category number for each row and your shipping, return and payment policy names first.</li>
+              <li><b>Amazon:</b> copy the columns from the universal sheet into the Amazon template for your category.</li>
+            </ul>
+            <p class="nxd-muted" style="font-size:13px;margin:12px 0 0">Keep the SKUs exactly as they are. We use them to identify your orders.</p>
+          </div>
+          <div class="nxd-card">
+            <h2>How it works</h2>
+            <ol class="nxd-steps">
+              <li>Find products and add them to your Import List.</li>
+              <li>Set your prices and export the file to your store.</li>
+              <li>Your customer buys from you at your price.</li>
+              <li>You order the product from us with your customer's address.</li>
+              <li>We ship it in plain packaging. You keep the profit.</li>
+            </ol>
+            <p style="margin:14px 0 0"><a class="nxd-btn line" href="/pages/contact">Contact support</a></p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+<div class="nxd-toast" id="nxd-toast"></div>
+
+<script type="application/json" id="nx-config">
+{ "discount": {{ nx_discount | json }}, "limit": {{ nx_limit | json }}, "tier": {{ nx_tier | json }}, "customer": {{ customer.id | json }} }
+</script>
+{% raw %}
+<script>
+(function () {
+  var cfg = JSON.parse(document.getElementById('nx-config').textContent);
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'nxd-' + cfg.customer + '-';
+  var PAGE = 40;
+  var TITLES = { overview: 'Overview', catalog: 'Find Products', imports: 'Import List', mine: 'My Products', stores: 'Connected Stores', orders: 'Orders', pricing: 'Pricing Rules', plan: 'Plan & Billing', help: 'Help Center' };
+  var HIDDEN_TAG = /^(nexra-plan|membership|subscription|usadrop.*|saleyee.*|sku-.*)$/i;
+  var FREE = cfg.tier === 'Free';
+
+  function load(k, d) { try { var v = localStorage.getItem(KEY + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem(KEY + k, JSON.stringify(v)); } catch (e) {} }
+
+  var all = [], byId = {}, filtered = [], shown = PAGE;
+  var list = load('list', {});          // id -> { m: custom markup % or '' }
+  var history = load('history', []);    // [{ id, title, img, platform, date, price }]
+  var settings = load('settings', { mtype: 'pct', markup: 40, round: '99', brand: '', saved: false });
+  // Carry over free imports counted by the previous dashboard version.
+  try {
+    var legacy = JSON.parse(localStorage.getItem('nx-free-imports-' + cfg.customer) || '[]');
+    legacy.forEach(function (id) { if (!history.some(function (h) { return String(h.id) === String(id); })) history.push({ id: id, platform: 'Earlier export', date: '' }); });
+  } catch (e) {}
+
+  // ---------- helpers ----------
+  function money(n) { return '$' + (Math.round(n * 100) / 100).toFixed(2); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function thumb(src, w) { return src ? src.replace(/(\.\w+)(\?|$)/, '_' + w + 'x$1$2') : ''; }
+  function toast(msg) { var t = $('nxd-toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove('on'); }, 2400); }
+  function tagsOf(p) { var t = Array.isArray(p.tags) ? p.tags : String(p.tags || '').split(','); return t.map(function (s) { return s.trim(); }).filter(Boolean); }
+  function cost(price) { return Number(price) * (1 - cfg.discount / 100); }
+  function roundPrice(s) {
+    if (settings.round === 'none') return Math.round(s * 100) / 100;
+    var end = settings.round === '99' ? 0.99 : settings.round === '95' ? 0.95 : 0;
+    var whole = Math.floor(s);
+    var r = whole + end;
+    if (r < s - 0.0001) r = whole + 1 + end;
+    if (end === 0) r = Math.ceil(s);
+    return Math.max(r, 0.99);
+  }
+  function sell(price, customMarkup) {
+    var c = cost(price);
+    var useCustom = customMarkup !== '' && customMarkup != null && !isNaN(Number(customMarkup));
+    var s = useCustom ? c * (1 + Number(customMarkup) / 100)
+      : settings.mtype === 'fixed' ? c + Number(settings.markup || 0) : c * (1 + Number(settings.markup || 0) / 100);
+    return roundPrice(s);
+  }
+  function minPrice(p) { return p.variants.reduce(function (a, v) { return Math.min(a, Number(v.price)); }, Infinity); }
+  function isDefault(p) { return p.variants.length === 1 && /^default/i.test(p.variants[0].title); }
+  function importedIds() { var u = {}; history.forEach(function (h) { u[String(h.id)] = 1; }); return Object.keys(u); }
+  function listIds() { return Object.keys(list); }
+
+  // Free plan: 3 distinct products in total (exported + in the list).
+  function freeBlocked(extraIds) {
+    if (!FREE) return false;
+    var u = {};
+    importedIds().concat(listIds(), extraIds || []).forEach(function (id) { u[String(id)] = 1; });
+    if (Object.keys(u).length <= cfg.limit) return false;
+    toast('Free plan: up to ' + cfg.limit + ' products. Upgrade to add more.');
+    return true;
+  }
+
+  // ---------- navigation ----------
+  function go(view) {
+    if (!TITLES[view]) view = 'overview';
+    document.querySelectorAll('.nxd-view').forEach(function (s) { s.classList.toggle('on', s.getAttribute('data-view') === view); });
+    document.querySelectorAll('.nxd-nav button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-view') === view); });
+    $('nxd-title').textContent = TITLES[view];
+    $('nxd').classList.remove('open');
+    if (location.hash !== '#' + view) history_replace(view);
+    if (view === 'imports') renderList();
+    if (view === 'mine') renderMine();
+    window.scrollTo(0, 0);
+  }
+  function history_replace(view) { try { window.history.replaceState(null, '', '#' + view); } catch (e) { location.hash = view; } }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.nxd-nav button[data-view], [data-go]');
+    if (b) { e.preventDefault(); go(b.getAttribute('data-go') || b.getAttribute('data-view')); return; }
+    if (e.target.closest('[data-nxd-open]')) $('nxd').classList.add('open');
+    if (e.target.closest('[data-nxd-close]')) $('nxd').classList.remove('open');
+  });
+
+  // ---------- counters ----------
+  function refreshCounts() {
+    var n = listIds().length, imp = importedIds().length;
+    $('nxd-k-list').textContent = n;
+    $('nxd-k-imported').textContent = imp;
+    var c = $('nxd-nav-count'); c.textContent = n; c.style.display = n ? '' : 'none';
+    if (FREE) {
+      var used = Math.min(importedIds().concat(listIds()).filter(function (v, i, a) { return a.indexOf(v) === i; }).length, cfg.limit);
+      $('nxd-usage-text').textContent = used + ' of ' + cfg.limit + ' free products used';
+      $('nxd-usage-bar').style.width = (used / cfg.limit * 100) + '%';
+    }
+    $('nxd-ck-pricing').classList.toggle('done', !!settings.saved);
+    $('nxd-ck-list').classList.toggle('done', n > 0 || imp > 0);
+    $('nxd-ck-export').classList.toggle('done', imp > 0);
+  }
+
+  // ---------- catalog ----------
+  async function loadProducts() {
+    for (var page = 1; page < 200; page++) {
+      var r = await fetch('/products.json?limit=250&page=' + page, { credentials: 'same-origin' });
+      if (!r.ok) break;
+      var d = await r.json(), batch = d.products || [];
+      batch.forEach(function (p) {
+        p._tags = tagsOf(p);
+        if (p._tags.indexOf('nexra-plan') > -1 || !p.variants || !p.variants.length) return;
+        p._min = minPrice(p);
+        all.push(p); byId[String(p.id)] = p;
+      });
+      $('nxd-k-total').textContent = all.length + '…';
+      if (batch.length < 250) break;
+    }
+    $('nxd-k-total').textContent = all.length;
+    var types = {};
+    all.forEach(function (p) { if (p.product_type) types[p.product_type] = 1; });
+    Object.keys(types).sort().forEach(function (t) { var o = document.createElement('option'); o.value = t; o.textContent = t; $('nxd-type').appendChild(o); });
+    applyFilter();
+    renderList(); renderMine(); refreshCounts();
+  }
+  function applyFilter() {
+    var q = $('nxd-q').value.trim().toLowerCase(), t = $('nxd-type').value, s = $('nxd-sort').value;
+    filtered = all.filter(function (p) { return (!t || p.product_type === t) && (!q || p.title.toLowerCase().indexOf(q) > -1); });
+    if (s === 'low') filtered.sort(function (a, b) { return a._min - b._min; });
+    else if (s === 'high') filtered.sort(function (a, b) { return b._min - a._min; });
+    else if (s === 'az') filtered.sort(function (a, b) { return a.title.localeCompare(b.title); });
+    else filtered.sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); });
+    shown = PAGE; renderCatalog();
+  }
+  function renderCatalog() {
+    var html = filtered.slice(0, shown).map(function (p) {
+      var img = p.images && p.images[0] ? thumb(p.images[0].src, 400) : '';
+      var c = cost(p._min), s = sell(p._min), inList = !!list[p.id];
+      return '<div class="nxd-p">' +
+        '<div class="nxd-p-img">' + (img ? '<img loading="lazy" src="' + esc(img) + '" alt="">' : '') + (p.product_type ? '<span class="nxd-tag">' + esc(p.product_type) + '</span>' : '') + '</div>' +
+        '<div class="nxd-p-body"><p class="nxd-p-title" title="' + esc(p.title) + '">' + esc(p.title) + '</p>' +
+        '<div class="nxd-p-nums"><div><small>Cost</small><b>' + money(c) + '</b></div><div><small>Sell</small><b>' + money(s) + '</b></div><div class="g"><small>Profit</small><b>' + money(s - c) + '</b></div></div>' +
+        '<div class="nxd-p-actions"><button class="nxd-btn sm ' + (inList ? 'added' : 'red') + '" data-add="' + p.id + '">' + (inList ? '✓ In list' : '+ Import') + '</button>' +
+        '<a class="nxd-btn sm line" href="/products/' + esc(p.handle) + '" target="_blank" style="flex:0 0 auto">View</a></div></div></div>';
+    }).join('');
+    $('nxd-products').innerHTML = html || '<div class="nxd-empty" style="grid-column:1/-1"><b>No products found</b>Try another search or category.</div>';
+    $('nxd-result-count').textContent = filtered.length + ' products';
+    $('nxd-more').style.display = filtered.length > shown ? '' : 'none';
+  }
+  $('nxd-products').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-add]'); if (!b) return;
+    var id = b.getAttribute('data-add');
+    if (list[id]) { delete list[id]; toast('Removed from Import List'); }
+    else { if (freeBlocked([id])) return; list[id] = { m: '' }; toast('Added to Import List'); }
+    save('list', list); renderCatalog(); refreshCounts();
+  });
+  $('nxd-q').addEventListener('input', applyFilter);
+  $('nxd-type').addEventListener('change', applyFilter);
+  $('nxd-sort').addEventListener('change', applyFilter);
+  $('nxd-more').addEventListener('click', function () { shown += PAGE; renderCatalog(); });
+
+  // ---------- import list ----------
+  function renderList() {
+    var rows = listIds().map(function (id) {
+      var p = byId[id]; if (!p) return '';
+      var m = list[id].m, c = cost(p._min), s = sell(p._min, m);
+      var img = p.images && p.images[0] ? thumb(p.images[0].src, 120) : '';
+      return '<tr><td>' + (img ? '<img src="' + esc(img) + '" alt="">' : '') + '</td>' +
+        '<td><b>' + esc(p.title) + '</b>' + (p.variants.length > 1 ? '<br><small class="nxd-muted">' + p.variants.length + ' variants · price shown is the lowest</small>' : '') + '</td>' +
+        '<td class="num">' + money(c) + '</td>' +
+        '<td><input class="nxd-input" type="number" min="0" step="1" placeholder="' + (settings.mtype === 'pct' ? settings.markup : 'rule') + '" value="' + esc(m) + '" data-m="' + id + '"></td>' +
+        '<td class="num"><b>' + money(s) + '</b></td><td class="num g">' + money(s - c) + '</td>' +
+        '<td><button class="nxd-btn sm line" data-rm="' + id + '">Remove</button></td></tr>';
+    }).join('');
+    $('nxd-list-rows').innerHTML = rows || '<tr><td colspan="7"><div class="nxd-empty"><b>Your Import List is empty</b>Go to <a href="#catalog" data-go="catalog">Find Products</a> and click <b>+ Import</b> on products you want to sell.</div></td></tr>';
+  }
+  $('nxd-list-rows').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-rm]'); if (!b) return;
+    delete list[b.getAttribute('data-rm')]; save('list', list); renderList(); renderCatalog(); refreshCounts();
+  });
+  $('nxd-list-rows').addEventListener('change', function (e) {
+    var id = e.target.getAttribute('data-m'); if (!id || !list[id]) return;
+    list[id].m = e.target.value; save('list', list); renderList();
+  });
+  $('nxd-clear').addEventListener('click', function () {
+    if (!listIds().length || !confirm('Remove all products from your Import List?')) return;
+    list = {}; save('list', list); renderList(); renderCatalog(); refreshCounts();
+  });
+
+  // ---------- my products ----------
+  function renderMine() {
+    var seen = {}, rows = [];
+    history.slice().reverse().forEach(function (h) {
+      var id = String(h.id); if (seen[id]) { seen[id].platforms.push(h.platform); return; }
+      seen[id] = { h: h, platforms: [h.platform] }; rows.push(seen[id]);
+    });
+    $('nxd-mine-rows').innerHTML = rows.map(function (r) {
+      var p = byId[String(r.h.id)], title = p ? p.title : (r.h.title || 'Product'), img = p && p.images[0] ? thumb(p.images[0].src, 120) : (r.h.img || '');
+      var plats = r.platforms.filter(function (v, i, a) { return v && a.indexOf(v) === i; }).join(', ');
+      return '<tr><td>' + (img ? '<img src="' + esc(img) + '" alt="">' : '') + '</td><td><b>' + esc(title) + '</b></td><td>' + esc(plats) + '</td><td>' + esc(r.h.date || '') + '</td>' +
+        '<td class="num">' + (p ? money(cost(p._min)) : '') + '</td>' +
+        '<td>' + (p ? '<a class="nxd-btn sm red" href="/products/' + esc(p.handle) + '" target="_blank">Order</a>' : '') + '</td></tr>';
+    }).join('') || '<tr><td colspan="6"><div class="nxd-empty"><b>No products exported yet</b>Add products to your Import List and export them to your store.</div></td></tr>';
+  }
+
+  // ---------- pricing rules ----------
+  function fillSettings() {
+    $('nxd-mtype').value = settings.mtype; $('nxd-markup').value = settings.markup;
+    $('nxd-round').value = settings.round; $('nxd-brand').value = settings.brand;
+    previewPricing();
+  }
+  function readSettings() {
+    settings.mtype = $('nxd-mtype').value; settings.markup = Number($('nxd-markup').value) || 0;
+    settings.round = $('nxd-round').value; settings.brand = $('nxd-brand').value.trim();
+  }
+  function previewPricing() {
+    readSettings();
+    var c = cost(20), s = sell(20);
+    $('nxd-ex-cost').textContent = money(c); $('nxd-ex-sell').textContent = money(s); $('nxd-ex-profit').textContent = money(s - c);
+  }
+  ['nxd-mtype', 'nxd-markup', 'nxd-round', 'nxd-brand'].forEach(function (id) { $(id).addEventListener('input', previewPricing); });
+  $('nxd-save-pricing').addEventListener('click', function () {
+    previewPricing(); settings.saved = true; save('settings', settings);
+    renderCatalog(); renderList(); refreshCounts(); toast('Pricing rule saved');
+  });
+
+  // ---------- CSV export ----------
+  function csv(rows) { return rows.map(function (r) { return r.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n'); }
+  function download(name, text) {
+    var blob = new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function brand() { return settings.brand; }
+  function cleanTags(p) { return p._tags.filter(function (t) { return !HIDDEN_TAG.test(t); }); }
+  function variantName(p, v) { return isDefault(p) ? p.title : p.title + ' - ' + v.title; }
+  function variantImage(p, v) { if (v.featured_image && v.featured_image.src) return v.featured_image.src; return p.images && p.images[0] ? p.images[0].src : ''; }
+  function plain(html) { var d = document.createElement('div'); d.innerHTML = html || ''; return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function vPrice(p, v) { return sell(v.price, list[p.id] ? list[p.id].m : '').toFixed(2); }
+
+  function shopifyFile(items) {
+    var head = ['Handle', 'Title', 'Body (HTML)', 'Vendor', 'Type', 'Tags', 'Published', 'Option1 Name', 'Option1 Value', 'Option2 Name', 'Option2 Value', 'Option3 Name', 'Option3 Value',
+      'Variant SKU', 'Variant Grams', 'Variant Inventory Tracker', 'Variant Inventory Qty', 'Variant Inventory Policy', 'Variant Fulfillment Service', 'Variant Price', 'Variant Compare At Price',
+      'Variant Requires Shipping', 'Variant Taxable', 'Image Src', 'Image Position', 'Image Alt Text', 'Variant Image', 'Status'];
+    var out = [head];
+    items.forEach(function (p) {
+      var def = isDefault(p), opts = p.options || [], imgs = p.images || [], n = Math.max(p.variants.length, imgs.length);
+      for (var i = 0; i < n; i++) {
+        var v = p.variants[i], img = imgs[i], first = i === 0, r = new Array(head.length).fill('');
+        r[0] = p.handle;
+        if (first) { r[1] = p.title; r[2] = p.body_html; r[3] = brand(); r[4] = p.product_type; r[5] = cleanTags(p).join(', '); r[6] = 'TRUE'; r[27] = 'active'; }
+        if (v) {
+          for (var k = 0; k < 3; k++) {
+            if (def) { if (k === 0) { if (first) r[7] = 'Title'; r[8] = 'Default Title'; } continue; }
+            if (!opts[k]) continue;
+            if (first) r[7 + k * 2] = opts[k].name;
+            r[8 + k * 2] = v['option' + (k + 1)];
+          }
+          r[13] = v.sku; r[14] = v.grams || 0; r[17] = 'continue'; r[18] = 'manual'; r[19] = vPrice(p, v); r[21] = 'TRUE'; r[22] = 'TRUE';
+          r[26] = v.featured_image ? v.featured_image.src : '';
+        }
+        if (img) { r[23] = img.src; r[24] = i + 1; r[25] = p.title; }
+        out.push(r);
+      }
+    });
+    return csv(out);
+  }
+  function wooFile(items) {
+    var head = ['Type', 'SKU', 'Name', 'Published', 'Is featured?', 'Visibility in catalog', 'Short description', 'Description', 'Tax status', 'In stock?', 'Weight (kg)', 'Regular price',
+      'Categories', 'Tags', 'Images', 'Parent', 'Attribute 1 name', 'Attribute 1 value(s)', 'Attribute 1 visible', 'Attribute 1 global', 'Attribute 2 name', 'Attribute 2 value(s)',
+      'Attribute 2 visible', 'Attribute 2 global', 'Attribute 3 name', 'Attribute 3 value(s)', 'Attribute 3 visible', 'Attribute 3 global'];
+    var out = [head];
+    items.forEach(function (p) {
+      var imgs = (p.images || []).map(function (i) { return i.src; }).join(', '), tags = cleanTags(p).join(', ');
+      if (isDefault(p)) {
+        var v = p.variants[0];
+        out.push(['simple', v.sku || 'NX-' + v.id, p.title, 1, 0, 'visible', '', p.body_html, 'taxable', 1, (v.grams || 0) / 1000, vPrice(p, v), p.product_type, tags, imgs, ''].concat(new Array(12).fill('')));
+        return;
+      }
+      var parent = 'NX-' + p.id, opts = p.options || [], attrs = [];
+      for (var k = 0; k < 3; k++) { if (opts[k]) attrs.push(opts[k].name, opts[k].values.join(', '), 1, 0); else attrs.push('', '', '', ''); }
+      out.push(['variable', parent, p.title, 1, 0, 'visible', '', p.body_html, 'taxable', 1, '', '', p.product_type, tags, imgs, ''].concat(attrs));
+      p.variants.forEach(function (v) {
+        var va = [];
+        for (var k = 0; k < 3; k++) { if (opts[k]) va.push(opts[k].name, v['option' + (k + 1)], '', 0); else va.push('', '', '', ''); }
+        out.push(['variation', v.sku || 'NX-' + v.id, variantName(p, v), 1, 0, 'visible', '', '', 'taxable', 1, (v.grams || 0) / 1000, vPrice(p, v), '', '', variantImage(p, v), parent].concat(va));
+      });
+    });
+    return csv(out);
+  }
+  function ebayFile(items) {
+    var head = ['*Action(SiteID=US|Country=US|Currency=USD|Version=1193)', '*Category', 'CustomLabel', '*Title', '*ConditionID', 'PicURL', '*Description', '*Format', '*Duration',
+      '*StartPrice', '*Quantity', '*Location', 'ShippingProfileName', 'ReturnProfileName', 'PaymentProfileName', 'C:Brand', 'C:Type'];
+    var out = [head];
+    items.forEach(function (p) {
+      var pics = (p.images || []).slice(0, 12).map(function (i) { return i.src; });
+      p.variants.forEach(function (v) {
+        var vi = variantImage(p, v), vp = vi ? [vi].concat(pics.filter(function (s) { return s !== vi; })).slice(0, 12) : pics;
+        out.push(['Add', '', v.sku, variantName(p, v).slice(0, 80), 1000, vp.join('|'), p.body_html, 'FixedPrice', 'GTC', vPrice(p, v), 10, 'United States', '', '', '', brand() || 'Unbranded', p.product_type]);
+      });
+    });
+    return csv(out);
+  }
+  function universalFile(items) {
+    var head = ['sku', 'parent_sku', 'title', 'variant', 'brand', 'category', 'description', 'price', 'quantity', 'weight_grams', 'main_image', 'image_2', 'image_3', 'image_4', 'image_5', 'image_6'];
+    var out = [head];
+    items.forEach(function (p) {
+      var pics = (p.images || []).map(function (i) { return i.src; }), text = plain(p.body_html);
+      p.variants.forEach(function (v) {
+        var main = variantImage(p, v), rest = pics.filter(function (s) { return s !== main; }).slice(0, 5);
+        while (rest.length < 5) rest.push('');
+        out.push([v.sku || 'NX-' + v.id, isDefault(p) ? '' : 'NX-' + p.id, p.title, isDefault(p) ? '' : v.title, brand(), p.product_type, text, vPrice(p, v), 10, v.grams || 0, main].concat(rest));
+      });
+    });
+    return csv(out);
+  }
+  var BUILDERS = { shopify: shopifyFile, woo: wooFile, ebay: ebayFile, universal: universalFile };
+  var NAMES = { shopify: 'Shopify', woo: 'WooCommerce', ebay: 'eBay', universal: 'Amazon / Other' };
+
+  document.querySelectorAll('[data-export]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var items = listIds().map(function (id) { return byId[id]; }).filter(Boolean);
+      if (!items.length) { toast('Add products to your Import List first'); go('catalog'); return; }
+      if (freeBlocked([])) return;
+      if (cfg.limit && !FREE && items.length > cfg.limit) { toast('Your ' + cfg.tier + ' plan allows ' + cfg.limit + ' products per file. Remove some or upgrade.'); return; }
+      var kind = b.getAttribute('data-export'), today = new Date().toISOString().slice(0, 10);
+      download('nexra-' + kind + '-' + today + '.csv', BUILDERS[kind](items));
+      items.forEach(function (p) { history.push({ id: p.id, title: p.title, platform: NAMES[kind], date: today }); });
+      save('history', history); renderMine(); refreshCounts();
+      toast(items.length + ' product' + (items.length > 1 ? 's' : '') + ' exported for ' + NAMES[kind]);
+    });
+  });
+
+  // ---------- Nexra Connect (direct push, store connections, order import) ----------
+  var API = '/apps/nexra/api';
+  var nx = { on: false, connections: [], maxPer: 10 };
+  async function api(path, body) {
+    var res = await fetch(API + path, body ? { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : { credentials: 'same-origin' });
+    var data = null;
+    try { data = await res.json(); } catch (e) { var off = new Error('unavailable'); off.unavailable = true; throw off; }
+    if (!res.ok) throw new Error((data && data.error) || 'Something went wrong');
+    return data;
+  }
+  function fmtDate(s) { return s ? new Date(s).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''; }
+  function setConnectOff() {
+    nx.on = false;
+    $('nxd-push-off').style.display = ''; $('nxd-push-ready').style.display = 'none'; $('nxd-push-nostore').style.display = 'none';
+    $('nxd-stores-off').style.display = '';
+    $('nxd-store-rows').innerHTML = '<tr><td colspan="5" class="nxd-muted">Not available yet.</td></tr>';
+  }
+  function renderStores() {
+    var c = nx.connections;
+    $('nxd-store-rows').innerHTML = c.length ? c.map(function (s) {
+      return '<tr><td><b>' + esc(s.name) + '</b><br><small class="nxd-muted">' + esc(s.store_url) + '</small></td><td>' + (s.platform === 'shopify' ? 'Shopify' : 'WooCommerce') + '</td>' +
+        '<td>' + (s.products || 0) + '</td><td>' + fmtDate(s.created_at) + '</td><td><button class="nxd-btn sm line" data-disconnect="' + esc(s.id) + '">Disconnect</button></td></tr>';
+    }).join('') : '<tr><td colspan="5"><div class="nxd-empty"><b>No stores connected yet</b>Connect your Shopify or WooCommerce store below.</div></td></tr>';
+    $('nxd-push-store').innerHTML = c.map(function (s) { return '<option value="' + esc(s.id) + '">' + esc(s.name) + ' (' + (s.platform === 'shopify' ? 'Shopify' : 'WooCommerce') + ')</option>'; }).join('');
+    $('nxd-push-off').style.display = 'none'; $('nxd-stores-off').style.display = 'none';
+    $('nxd-push-ready').style.display = c.length ? '' : 'none';
+    $('nxd-push-nostore').style.display = c.length ? 'none' : '';
+  }
+  async function loadConnect() {
+    try {
+      var st = await api('/status');
+      nx.on = true; nx.connections = st.connections || []; nx.maxPer = st.maxPerRequest || 10;
+      renderStores(); loadPushed(); loadImported();
+    } catch (e) { setConnectOff(); }
+  }
+  async function loadPushed() {
+    try {
+      var d = await api('/products'), rows = d.products || [];
+      $('nxd-pushed-card').style.display = rows.length ? '' : 'none';
+      $('nxd-pushed-rows').innerHTML = rows.map(function (r) {
+        var p = byId[String(r.source_product_id)];
+        return '<tr><td>' + (r.image ? '<img src="' + esc(thumb(r.image, 120)) + '" alt="">' : '') + '</td><td><b>' + esc(r.title) + '</b></td><td>' + esc(r.store_name) + '</td>' +
+          '<td><span class="nxd-pill ' + (r.status === 'active' ? 'ok' : 'wait') + '">' + (r.status === 'active' ? 'Live' : 'Paused') + '</span></td><td>' + fmtDate(r.updated_at) + '</td>' +
+          '<td>' + (p ? '<a class="nxd-btn sm line" href="/products/' + esc(p.handle) + '" target="_blank">View</a>' : '') + '</td></tr>';
+      }).join('');
+    } catch (e) {}
+  }
+  async function loadImported() {
+    try {
+      var d = await api('/orders'), rows = d.orders || [];
+      $('nxd-imp-card').style.display = rows.length ? '' : 'none';
+      $('nxd-imp-rows').innerHTML = rows.map(function (o) {
+        var s = o.order.shipping || {}, items = (o.order.lines || []).reduce(function (n, l) { return n + l.quantity; }, 0);
+        var action = o.status === 'sent'
+          ? (o.invoice_url ? '<a class="nxd-btn sm line" href="' + esc(o.invoice_url) + '" target="_blank">View invoice</a>' : '')
+          : '<button class="nxd-btn sm red" data-send="' + esc(o.id) + '">Pay &amp; send</button>';
+        return '<tr><td><b>' + esc(o.name) + '</b><br><small class="nxd-muted">' + fmtDate(o.created_at) + '</small></td><td>' + esc(o.store_name) + '</td>' +
+          '<td>' + esc((s.firstName || '') + ' ' + (s.lastName || '')) + '<br><small class="nxd-muted">' + esc(s.city || '') + (s.provinceCode ? ', ' + esc(s.provinceCode) : '') + '</small></td>' +
+          '<td>' + items + '</td><td><span class="nxd-pill ' + (o.status === 'sent' ? 'ok' : 'wait') + '">' + (o.status === 'sent' ? 'Sent to Nexra' : 'Needs payment') + '</span></td><td>' + action + '</td></tr>';
+      }).join('');
+    } catch (e) {}
+  }
+  $('nxd-connect-shopify').addEventListener('click', async function () {
+    var shop = $('nxd-shop').value.trim();
+    if (!shop) { toast('Enter your store address'); return; }
+    this.disabled = true;
+    try { var d = await api('/connect/shopify', { shop: shop }); location.href = d.redirect; }
+    catch (e) { toast(e.unavailable ? 'Store connections are not available yet' : e.message); this.disabled = false; }
+  });
+  $('nxd-connect-woo').addEventListener('click', async function () {
+    this.disabled = true;
+    try {
+      var d = await api('/connect/woo', { url: $('nxd-woo-url').value, key: $('nxd-woo-key').value, secret: $('nxd-woo-secret').value });
+      nx.connections = d.connections || nx.connections; renderStores(); toast('WooCommerce store connected');
+      $('nxd-woo-key').value = ''; $('nxd-woo-secret').value = '';
+    } catch (e) { toast(e.unavailable ? 'Store connections are not available yet' : e.message); }
+    this.disabled = false;
+  });
+  $('nxd-store-rows').addEventListener('click', async function (e) {
+    var b = e.target.closest('[data-disconnect]'); if (!b) return;
+    if (!confirm('Disconnect this store? Products already in it stay there, but prices stop syncing.')) return;
+    try { var d = await api('/disconnect', { id: b.getAttribute('data-disconnect') }); nx.connections = d.connections || []; renderStores(); toast('Store disconnected'); }
+    catch (err) { toast(err.message); }
+  });
+  $('nxd-imp-rows').addEventListener('click', async function (e) {
+    var b = e.target.closest('[data-send]'); if (!b) return;
+    b.disabled = true; b.textContent = 'Preparing…';
+    try { var d = await api('/orders/send', { id: b.getAttribute('data-send') }); loadImported(); if (d.invoiceUrl) window.open(d.invoiceUrl, '_blank'); toast('Order sent. Complete payment in the new tab.'); }
+    catch (err) { toast(err.message); b.disabled = false; b.textContent = 'Pay & send'; }
+  });
+  $('nxd-push-btn').addEventListener('click', async function () {
+    var ids = listIds();
+    if (!ids.length) { toast('Add products to your Import List first'); go('catalog'); return; }
+    var store = $('nxd-push-store').value, btn = this, bar = $('nxd-push-progress'), out = $('nxd-push-results');
+    var name = $('nxd-push-store').selectedOptions[0] ? $('nxd-push-store').selectedOptions[0].textContent : 'your store';
+    btn.disabled = true; bar.style.display = 'block'; bar.firstChild.style.width = '0'; out.innerHTML = '';
+    var done = 0, okCount = 0, today = new Date().toISOString().slice(0, 10);
+    for (var i = 0; i < ids.length; i += nx.maxPer) {
+      var chunk = ids.slice(i, i + nx.maxPer);
+      try {
+        var d = await api('/push', { connectionId: store, items: chunk.map(function (id) { return { id: id, markup: list[id] ? list[id].m : '' }; }), rule: settings });
+        d.results.forEach(function (r) {
+          var p = byId[String(r.id)], title = r.title || (p ? p.title : r.id);
+          if (r.ok) { okCount++; history.push({ id: r.id, title: title, platform: name, date: today }); delete list[r.id]; }
+          out.insertAdjacentHTML('beforeend', '<li class="' + (r.ok ? '' : 'bad') + '">' + (r.ok ? '✓ ' : '✕ ') + esc(title) + (r.ok ? (r.updated ? ' updated' : ' added') : ': ' + esc(r.error)) + '</li>');
+        });
+      } catch (e) {
+        out.insertAdjacentHTML('beforeend', '<li class="bad">✕ ' + esc(e.message) + '</li>');
+        if (/plan/i.test(e.message)) break;
+      }
+      done += chunk.length; bar.firstChild.style.width = Math.round(done / ids.length * 100) + '%';
+    }
+    save('list', list); save('history', history);
+    renderList(); renderCatalog(); renderMine(); refreshCounts(); loadPushed(); loadConnect();
+    btn.disabled = false;
+    toast(okCount ? okCount + ' product' + (okCount > 1 ? 's' : '') + ' pushed to ' + name : 'Nothing was pushed');
+  });
+
+  // ---------- plan billing cycle ----------
+  document.querySelectorAll('.nxd-cycle button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var c = b.getAttribute('data-cycle');
+      document.querySelectorAll('.nxd-cycle button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      document.querySelectorAll('.nxd-plan .p[data-m]').forEach(function (el) { el.innerHTML = el.getAttribute('data-' + c); });
+      document.querySelectorAll('.nxd-buy input[data-m]').forEach(function (i) { i.value = i.getAttribute('data-' + c); i.disabled = !i.value; });
+    });
+  });
+  document.querySelectorAll('.nxd-buy input[name="selling_plan"]').forEach(function (i) { i.disabled = !i.value; });
+
+  // ---------- start ----------
+  fillSettings();
+  refreshCounts();
+  go((location.hash || '#overview').slice(1));
+  loadProducts().then(function () { if (nx.on) loadPushed(); }).catch(function () { $('nxd-result-count').textContent = 'Could not load products. Please refresh the page.'; });
+  loadConnect();
+})();
+</script>
+{% endraw %}
+{%- endif -%}

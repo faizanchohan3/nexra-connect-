@@ -1,0 +1,90 @@
+{% comment %}
+  Nexra LLC: "Customer / Become a seller" switch for the login and register pages.
+  Seller mode adds hidden fields to the theme's existing forms:
+  - login:    checkout_url -> reseller dashboard
+  - register: customer[tags] = seller-applicant, seller details in customer[note], return_to -> reseller dashboard
+  Access to the dashboard itself is only granted by the nexra-starter / nexra-growth / nexra-pro tags.
+{% endcomment %}
+<style>
+  .nx-switch{max-width:720px;margin:10px auto 26px;text-align:center}
+  .nx-switch h1{font-size:26px;margin:0 0 6px}
+  .nx-switch p{color:#666;margin:0 0 16px}
+  .nx-tabs{display:inline-flex;border:1px solid #111;border-radius:8px;overflow:hidden}
+  .nx-tabs button{border:0;background:#fff;color:#111;padding:12px 22px;font-weight:600;cursor:pointer;font-size:15px}
+  .nx-tabs button.active{background:#111;color:#fff}
+  .nx-seller-info{display:none;max-width:720px;margin:0 auto 20px;background:#f7f8fa;border-radius:8px;padding:14px 18px;text-align:left;font-size:14px;line-height:1.7}
+  .nx-seller-mode .nx-seller-info{display:block}
+  .nx-seller-fields{display:none}
+  .nx-seller-mode .nx-seller-fields{display:block}
+</style>
+
+<div class="nx-switch">
+  <h1>Welcome to Nexra LLC</h1>
+  <p>How do you want to use your account?</p>
+  <div class="nx-tabs" role="tablist">
+    <button type="button" class="active" data-nx-mode="customer" role="tab">Shop as a customer</button>
+    <button type="button" data-nx-mode="seller" role="tab">Become a seller</button>
+  </div>
+</div>
+<div class="nx-seller-info">
+  <b>Sell our products in your own store.</b> Import our catalog into Shopify, WooCommerce, eBay or Amazon, set your own prices, and we ship every order to your customers.
+  Create your seller account or log in below. Then <a href="/collections/nexra-reseller-plans">choose a plan</a> to unlock your Reseller Dashboard.
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var DASHBOARD = '/pages/reseller-dashboard';
+  var tabs = document.querySelectorAll('[data-nx-mode]');
+
+  function sellerFields() {
+    var wrap = document.createElement('div');
+    wrap.className = 'nx-seller-fields';
+    wrap.innerHTML =
+      '<input type="hidden" name="customer[tags]" value="seller-applicant">' +
+      '<input type="hidden" name="return_to" value="' + DASHBOARD + '">' +
+      '<li style="list-style:none"><label>Store / business name<em>*</em></label>' +
+      '<input type="text" class="input-full" name="customer[note][Store name]" data-nx-required></li>' +
+      '<li style="list-style:none"><label>Store website (optional)</label>' +
+      '<input type="text" class="input-full" name="customer[note][Store website]"></li>' +
+      '<li style="list-style:none"><label>Where do you sell?</label>' +
+      '<input type="text" class="input-full" name="customer[note][Sells on]" placeholder="Shopify, WooCommerce, eBay, Amazon…"></li>';
+    return wrap;
+  }
+
+  // Prepare every form on the page once.
+  document.querySelectorAll('form').forEach(function (form) {
+    var action = form.getAttribute('action') || '';
+    if (/\/account\/login$/.test(action)) {
+      var h = document.createElement('input');
+      h.type = 'hidden'; h.name = 'checkout_url'; h.value = DASHBOARD; h.disabled = true;
+      h.setAttribute('data-nx-seller-only', '');
+      form.appendChild(h);
+    } else if (/\/account$/.test(action) && form.querySelector('[name="customer[password]"]')) {
+      var f = sellerFields();
+      var list = form.querySelector('.form-list') || form;
+      var submitLi = list.querySelector('.buttons-set');
+      list.insertBefore(f, submitLi ? submitLi.closest('li') : null);
+      form.addEventListener('submit', function (e) {
+        if (!document.body.classList.contains('nx-seller-mode')) return;
+        var req = form.querySelector('[data-nx-required]');
+        if (req && !req.value.trim()) { e.preventDefault(); alert('Please enter your store or business name.'); req.focus(); }
+      });
+    }
+  });
+
+  function setMode(mode) {
+    var seller = mode === 'seller';
+    document.body.classList.toggle('nx-seller-mode', seller);
+    tabs.forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-nx-mode') === mode); });
+    // Disabled inputs are not submitted, so customer mode sends the original forms unchanged.
+    document.querySelectorAll('[data-nx-seller-only], .nx-seller-fields input').forEach(function (i) { i.disabled = !seller; });
+    try { sessionStorage.setItem('nx-mode', mode); } catch (e) {}
+  }
+
+  tabs.forEach(function (t) { t.addEventListener('click', function () { setMode(t.getAttribute('data-nx-mode')); }); });
+  var start = 'customer';
+  if (location.hash === '#seller') start = 'seller';
+  else { try { start = sessionStorage.getItem('nx-mode') || 'customer'; } catch (e) {} }
+  setMode(start);
+});
+</script>

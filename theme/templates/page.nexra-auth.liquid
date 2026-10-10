@@ -1,0 +1,199 @@
+<!-- /templates/page.nexra-auth.liquid — Nexra LLC login / sign-up pages for customers and sellers.
+     One template, four pages: customer-login, customer-signup, seller-login, seller-signup.
+     Shopify's new customer accounts sign people in with a one-time email code on Shopify's page;
+     these pages collect the email (and seller details) first, then hand over to that step. -->
+{% include 'breadcrumb' %}
+{%- assign nx_seller = false -%}
+{%- if page.handle contains 'seller' -%}{%- assign nx_seller = true -%}{%- endif -%}
+{%- assign nx_signup = false -%}
+{%- if page.handle contains 'signup' -%}{%- assign nx_signup = true -%}{%- endif -%}
+{%- if nx_seller -%}
+  {%- assign nx_return = '/pages/reseller-dashboard' -%}
+{%- else -%}
+  {%- assign nx_return = routes.account_url -%}
+{%- endif -%}
+<style>
+  .nxa{padding:30px 15px 70px;color:#1b2440}
+  .nxa-wrap{display:grid;grid-template-columns:1fr 1fr;max-width:1040px;margin:0 auto;border-radius:22px;overflow:hidden;box-shadow:0 14px 44px rgba(20,30,60,.12);background:#fff}
+  .nxa-side{background:#1b2440;color:#fff;padding:44px 40px;display:flex;flex-direction:column}
+  .nxa-side.cust{background:linear-gradient(160deg,#1b2440 0%,#2b3a66 100%)}
+  .nxa-side.sell{background:linear-gradient(160deg,#1b2440 0%,#5a0f17 130%)}
+  .nxa-tag{display:inline-block;align-self:flex-start;background:rgba(255,255,255,.12);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:18px}
+  .nxa-side h2{font-size:30px;font-weight:800;line-height:1.2;margin:0 0 12px;color:#fff}
+  .nxa-side > p{color:#c9cfdd;font-size:15px;line-height:1.6;margin:0 0 26px}
+  .nxa-perks{list-style:none;margin:0;padding:0;flex:1}
+  .nxa-perks li{display:flex;gap:12px;align-items:flex-start;padding:10px 0;font-size:15px;line-height:1.45;border-top:1px solid rgba(255,255,255,.08)}
+  .nxa-perks li:first-child{border-top:0}
+  .nxa-perks svg{flex:0 0 22px;width:22px;height:22px;margin-top:1px}
+  .nxa-side-foot{margin-top:26px;font-size:13px;color:#aab2c5}
+  .nxa-side-foot a{color:#fff;text-decoration:underline}
+  .nxa-main{padding:40px 42px 36px}
+  .nxa-role{display:grid;grid-template-columns:1fr 1fr;background:#f2f4f8;border-radius:12px;padding:4px;margin-bottom:22px}
+  .nxa-role a{text-align:center;padding:11px 8px;border-radius:9px;font-weight:700;font-size:14.5px;color:#5b6378;text-decoration:none}
+  .nxa-role a.on{background:#fff;color:#1b2440;box-shadow:0 2px 8px rgba(20,30,60,.10)}
+  .nxa-main h1{font-size:28px;font-weight:800;margin:0 0 6px}
+  .nxa-sub{color:#5b6378;font-size:15px;margin:0 0 24px}
+  .nxa-field{margin-bottom:16px}
+  .nxa-field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:6px}
+  .nxa-field label em{color:#c8101a;font-style:normal}
+  .nxa-field input,.nxa-field select{width:100%;height:48px;border:1.5px solid #d8dce6;border-radius:10px;padding:0 14px;font-size:15.5px;color:#1b2440;background:#fff;transition:border-color .2s,box-shadow .2s}
+  .nxa-field input:focus,.nxa-field select:focus{outline:0;border-color:#1b2440;box-shadow:0 0 0 3px rgba(27,36,64,.12)}
+  .nxa-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .nxa-checks{display:flex;flex-wrap:wrap;gap:8px}
+  .nxa-checks label{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #d8dce6;border-radius:20px;padding:7px 12px;font-size:13.5px;font-weight:600;cursor:pointer;margin:0}
+  .nxa-checks input{width:auto;height:auto;margin:0}
+  .nxa-checks label:has(input:checked){border-color:#1b2440;background:#f2f4f8}
+  .nxa-btn{display:block;width:100%;height:52px;border:0;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;color:#fff;background:#1b2440;transition:opacity .2s;margin-top:6px}
+  .nxa-btn.red{background:#c8101a}
+  .nxa-btn:hover{opacity:.9}
+  .nxa-secure{display:flex;align-items:center;justify-content:center;gap:6px;color:#8a91a5;font-size:12.5px;margin:12px 0 0}
+  .nxa-secure svg{width:14px;height:14px}
+  .nxa-switch{text-align:center;font-size:14.5px;color:#5b6378;margin:22px 0 0;padding-top:18px;border-top:1px solid #eceef3}
+  .nxa-switch a{color:#c8101a;font-weight:700}
+  .nxa-ok{background:#e7f6ee;border:1px solid #b8e4cb;color:#0a5c2f;border-radius:12px;padding:16px 18px;font-size:14.5px;line-height:1.55;margin-bottom:18px}
+  .nxa-err{background:#fdecee;border:1px solid #f3b8be;color:#8a0d17;border-radius:12px;padding:12px 16px;font-size:14px;margin-bottom:16px}
+  .nxa-in{text-align:center;padding:30px 0}
+  .nxa-in .nxa-btn{display:inline-block;width:auto;padding:0 28px;line-height:52px;text-decoration:none;margin:6px}
+  @media (max-width:860px){
+    .nxa-wrap{grid-template-columns:1fr}
+    .nxa-side{order:2;padding:30px 24px}
+    .nxa-main{padding:28px 22px}
+    .nxa-side h2{font-size:24px}
+  }
+  @media (max-width:480px){ .nxa-row{grid-template-columns:1fr} }
+</style>
+
+{%- capture nx_check -%}<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="{% if nx_seller %}#c8101a{% else %}#3b4d82{% endif %}"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>{%- endcapture -%}
+
+<div class="container nxa">
+<div class="nxa-wrap">
+
+  <div class="nxa-main">
+    <div class="nxa-role">
+      <a href="/pages/customer-{% if nx_signup %}signup{% else %}login{% endif %}" class="{% unless nx_seller %}on{% endunless %}" data-nx-direct>I'm a customer</a>
+      <a href="/pages/seller-{% if nx_signup %}signup{% else %}login{% endif %}" class="{% if nx_seller %}on{% endif %}" data-nx-direct>I'm a seller</a>
+    </div>
+
+    {%- if customer -%}
+      <div class="nxa-in">
+        <h1>You're signed in{% if customer.first_name != blank %}, {{ customer.first_name }}{% endif %}</h1>
+        <p class="nxa-sub">Where would you like to go?</p>
+        <a class="nxa-btn" href="{{ routes.account_url }}" data-nx-direct>My account</a>
+        <a class="nxa-btn red" href="/pages/reseller-dashboard">Reseller Dashboard</a>
+      </div>
+
+    {%- elsif nx_seller and nx_signup -%}
+      {%- form 'contact', id: 'nxa-seller-form' -%}
+        {%- if form.posted_successfully? -%}
+          <div class="nxa-ok"><b>Application received. Thank you!</b><br>Next, verify your email to create your seller account. We'll send you a 6-digit code.</div>
+          <a class="nxa-btn red" id="nxa-continue" href="/customer_authentication/login?return_to={{ nx_return | url_encode }}" data-nx-direct style="line-height:52px;text-align:center;text-decoration:none">Verify email &amp; continue</a>
+        {%- else -%}
+          <h1>Become a Nexra seller</h1>
+          <p class="nxa-sub">Start free with 3 products. Tell us about your business, it takes one minute.</p>
+          {%- if form.errors -%}<div class="nxa-err">{{ form.errors | default_errors }}</div>{%- endif -%}
+          <input type="hidden" name="contact[Form]" value="Seller sign-up">
+          <div class="nxa-row">
+            <div class="nxa-field"><label for="nxa-fn">First name <em>*</em></label><input id="nxa-fn" type="text" name="contact[First name]" required autocomplete="given-name"></div>
+            <div class="nxa-field"><label for="nxa-ln">Last name <em>*</em></label><input id="nxa-ln" type="text" name="contact[Last name]" required autocomplete="family-name"></div>
+          </div>
+          <div class="nxa-field"><label for="nxa-em">Email <em>*</em></label><input id="nxa-em" type="email" name="contact[email]" required autocomplete="email" placeholder="you@example.com"></div>
+          <div class="nxa-field"><label for="nxa-ph">Phone / WhatsApp</label><input id="nxa-ph" type="tel" name="contact[phone]" autocomplete="tel"></div>
+          <div class="nxa-field"><label for="nxa-st">Store or business name <em>*</em></label><input id="nxa-st" type="text" name="contact[Store name]" required></div>
+          <div class="nxa-field"><label for="nxa-url">Store website</label><input id="nxa-url" type="text" name="contact[Store website]" placeholder="mystore.com (optional)"></div>
+          <div class="nxa-field">
+            <label>Where do you sell?</label>
+            <div class="nxa-checks">
+              <label><input type="checkbox" name="contact[Sells on Shopify]" value="yes"> Shopify</label>
+              <label><input type="checkbox" name="contact[Sells on WooCommerce]" value="yes"> WooCommerce</label>
+              <label><input type="checkbox" name="contact[Sells on eBay]" value="yes"> eBay</label>
+              <label><input type="checkbox" name="contact[Sells on Amazon]" value="yes"> Amazon</label>
+              <label><input type="checkbox" name="contact[Sells elsewhere]" value="yes"> Other</label>
+            </div>
+          </div>
+          <div class="nxa-field">
+            <label for="nxa-plan">Plan you're interested in</label>
+            <select id="nxa-plan" name="contact[Plan]">
+              <option>Not sure yet</option><option selected>Free (3 products)</option><option>Starter</option><option>Growth</option><option>Pro (Done-For-You)</option>
+            </select>
+          </div>
+          <button type="submit" class="nxa-btn red">Create seller account</button>
+          <p class="nxa-secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Next you'll verify your email with a one-time code.</p>
+        {%- endif -%}
+      {%- endform -%}
+      <p class="nxa-switch">Already a seller? <a href="/pages/seller-login" data-nx-direct>Log in</a></p>
+
+    {%- else -%}
+      <form method="get" action="/customer_authentication/login" id="nxa-email-form">
+        <input type="hidden" name="return_to" value="{{ nx_return }}">
+        {%- if nx_signup -%}
+          <h1>Create your account</h1>
+          <p class="nxa-sub">Free and fast. No password needed.</p>
+        {%- elsif nx_seller -%}
+          <h1>Seller log in</h1>
+          <p class="nxa-sub">Welcome back. Log in to your Reseller Dashboard.</p>
+        {%- else -%}
+          <h1>Welcome back</h1>
+          <p class="nxa-sub">Log in to see your orders and checkout faster.</p>
+        {%- endif -%}
+        <div class="nxa-field"><label for="nxa-email">Email <em>*</em></label><input id="nxa-email" type="email" name="login_hint" required autocomplete="email" placeholder="you@example.com"></div>
+        <button type="submit" class="nxa-btn{% if nx_seller %} red{% endif %}">{% if nx_signup %}Create account{% else %}Continue{% endif %}</button>
+        <p class="nxa-secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>We'll email you a 6-digit code to sign in securely.</p>
+      </form>
+      <p class="nxa-switch">
+        {%- if nx_signup -%}
+          Already have an account? <a href="/pages/{% if nx_seller %}seller{% else %}customer{% endif %}-login" data-nx-direct>Log in</a>
+        {%- elsif nx_seller -%}
+          New seller? <a href="/pages/seller-signup" data-nx-direct>Create a seller account</a>
+        {%- else -%}
+          New to Nexra? <a href="/pages/customer-signup" data-nx-direct>Create an account</a>
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+  </div>
+
+  <div class="nxa-side {% if nx_seller %}sell{% else %}cust{% endif %}">
+    {%- if nx_seller -%}
+      <span class="nxa-tag">Nexra Reseller Program</span>
+      <h2>Sell our products. Keep the profit.</h2>
+      <p>Import ready-to-sell products into your store, set your own prices, and we ship every order to your customer.</p>
+      <ul class="nxa-perks">
+        <li>{{ nx_check }}<span><b>700+ products</b> ready to import</span></li>
+        <li>{{ nx_check }}<span>Files for <b>Shopify, WooCommerce, eBay &amp; Amazon</b></span></li>
+        <li>{{ nx_check }}<span><b>You set the price</b> and keep the difference</span></li>
+        <li>{{ nx_check }}<span><b>No stock needed</b>. Pay only after you sell</span></li>
+        <li>{{ nx_check }}<span><b>Blind shipping</b> in plain packaging</span></li>
+      </ul>
+      <p class="nxa-side-foot"><b style="color:#fff">Start free with 3 products</b> · Paid plans from $29/month · <a href="/collections/nexra-reseller-plans">Compare plans</a></p>
+    {%- else -%}
+      <span class="nxa-tag">Nexra LLC</span>
+      <h2>Everything for your home, delivered.</h2>
+      <p>Create a free account to shop faster and keep track of every order.</p>
+      <ul class="nxa-perks">
+        <li>{{ nx_check }}<span><b>Faster checkout</b> with saved addresses</span></li>
+        <li>{{ nx_check }}<span><b>Track your orders</b> in one place</span></li>
+        <li>{{ nx_check }}<span><b>Member-only deals</b> and early offers</span></li>
+        <li>{{ nx_check }}<span><b>No password</b>. Sign in with an email code</span></li>
+      </ul>
+      <p class="nxa-side-foot">Want to sell our products? <a href="/pages/seller-signup" data-nx-direct>Become a seller</a></p>
+    {%- endif -%}
+  </div>
+
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Remember the seller's email so the code step can be pre-filled after the application is sent.
+  var sf = document.getElementById('nxa-seller-form');
+  if (sf) sf.addEventListener('submit', function () {
+    var em = document.getElementById('nxa-em');
+    try { if (em) sessionStorage.setItem('nxa-email', em.value); } catch (e) {}
+  });
+  var cont = document.getElementById('nxa-continue');
+  if (cont) {
+    var email = '';
+    try { email = sessionStorage.getItem('nxa-email') || ''; } catch (e) {}
+    if (email) cont.href += '&login_hint=' + encodeURIComponent(email);
+  }
+});
+</script>

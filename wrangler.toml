@@ -1,0 +1,21 @@
+name = "nexra-connect"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+[vars]
+# Public address of this worker (shown after the first `wrangler deploy`).
+APP_URL = "https://nexra-connect.YOUR-SUBDOMAIN.workers.dev"
+# The Nexra store (supplier).
+SUPPLIER_SHOP = "h0vzt0-80.myshopify.com"
+STOREFRONT_URL = "https://nexrallc.com"
+API_VERSION = "2025-07"
+
+# Secrets (set with `npx wrangler secret put NAME`, never commit them):
+#   SHOPIFY_API_KEY     Client ID from the Shopify Partner dashboard
+#   SHOPIFY_API_SECRET  Client secret from the Shopify Partner dashboard
+#   ENCRYPTION_KEY      32 random bytes, base64 (see README)
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nexra-connect"
+database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"

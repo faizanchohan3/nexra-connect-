@@ -1,0 +1,19 @@
+{
+  "name": "nexra-connect",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Nexra LLC seller connector: push products to Shopify and WooCommerce stores, sync prices, import orders.",
+  "scripts": {
+    "test": "node --test --no-warnings test/*.test.js",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute nexra-connect --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.114.0"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

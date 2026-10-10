@@ -1,0 +1,15 @@
+{% comment %} Nexra LLC: reseller links on the customer account page {% endcomment %}
+{%- assign nx_member = false -%}
+{%- if customer.tags contains 'nexra-starter' or customer.tags contains 'nexra-growth' or customer.tags contains 'nexra-pro' or customer.tags contains 'nexra-reseller' -%}{%- assign nx_member = true -%}{%- endif -%}
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:#f7f8fa;border-radius:8px;padding:14px 18px;margin:16px 0">
+  {%- if nx_member -%}
+    <span><b>Nexra seller account.</b> Import products, set your prices and download files for your stores.</span>
+    <a href="/pages/reseller-dashboard" style="background:#111;color:#fff;padding:10px 18px;border-radius:6px;font-weight:600;text-decoration:none">Open Reseller Dashboard</a>
+  {%- elsif customer.tags contains 'seller-applicant' -%}
+    <span><b>Seller account created.</b> Choose a plan to unlock your Reseller Dashboard.</span>
+    <a href="/collections/nexra-reseller-plans" style="background:#111;color:#fff;padding:10px 18px;border-radius:6px;font-weight:600;text-decoration:none">Choose a plan</a>
+  {%- else -%}
+    <span>Want to sell our products in your own store?</span>
+    <a href="/collections/nexra-reseller-plans" style="border:1px solid #111;color:#111;padding:10px 18px;border-radius:6px;font-weight:600;text-decoration:none">Become a seller</a>
+  {%- endif -%}
+</div>

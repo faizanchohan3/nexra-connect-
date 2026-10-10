@@ -1,0 +1,117 @@
+<!-- /templates/page.join.liquid — Nexra LLC: choose "customer" or "seller" before Shopify's login -->
+{% include 'breadcrumb' %}
+{%- assign nx_dash = '/pages/reseller-dashboard' -%}
+{%- capture nx_login_customer -%}/customer_authentication/login?return_to={{ '/account' | url_encode }}{%- endcapture -%}
+{%- capture nx_login_seller -%}/customer_authentication/login?return_to={{ nx_dash | url_encode }}{%- endcapture -%}
+<style>
+  .nx-join{padding:30px 15px 70px;color:#1b2440}
+  .nx-join-head{text-align:center;max-width:680px;margin:0 auto 34px}
+  .nx-join-head h1{font-size:34px;font-weight:800;margin:0 0 10px;letter-spacing:-.01em}
+  .nx-join-head p{font-size:16px;color:#5b6378;margin:0}
+  .nx-join-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;max-width:980px;margin:0 auto}
+  .nx-join-card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid #e3e6ee;border-radius:18px;padding:30px 28px 28px;box-shadow:0 6px 24px rgba(20,30,60,.06);transition:transform .2s,box-shadow .2s,border-color .2s}
+  .nx-join-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(20,30,60,.12);border-color:#1b2440}
+  .nx-join-card.seller{background:#1b2440;color:#fff;border-color:#1b2440}
+  .nx-join-tag{position:absolute;top:18px;right:18px;background:#c8101a;color:#fff;font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;letter-spacing:.02em}
+  .nx-join-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#f2f4f8;margin-bottom:18px}
+  .nx-join-card.seller .nx-join-icon{background:rgba(255,255,255,.12)}
+  .nx-join-icon svg{width:28px;height:28px}
+  .nx-join-card h2{font-size:24px;font-weight:800;margin:0 0 8px;color:inherit}
+  .nx-join-card > p{font-size:15px;line-height:1.55;margin:0 0 18px;color:#5b6378}
+  .nx-join-card.seller > p{color:#c9cfdd}
+  .nx-join-list{list-style:none;margin:0 0 26px;padding:0;flex:1}
+  .nx-join-list li{position:relative;padding:7px 0 7px 28px;font-size:15px;line-height:1.45}
+  .nx-join-list li::before{content:"";position:absolute;left:0;top:10px;width:18px;height:18px;border-radius:50%;background:#e7f6ee url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%230a7a3d'%3E%3Cpath d='M8 13.2 4.8 10l-1.1 1.1L8 15.4l8.3-8.3-1.1-1.1z'/%3E%3C/svg%3E") center/14px no-repeat}
+  .nx-join-card.seller .nx-join-list li::before{background-color:rgba(255,255,255,.15);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23ffffff'%3E%3Cpath d='M8 13.2 4.8 10l-1.1 1.1L8 15.4l8.3-8.3-1.1-1.1z'/%3E%3C/svg%3E")}
+  .nx-join-btn{display:block;text-align:center;padding:15px 18px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none !important;transition:opacity .2s}
+  .nx-join-btn:hover{opacity:.88}
+  .nx-join-btn.dark{background:#1b2440;color:#fff !important}
+  .nx-join-btn.light{background:#fff;color:#1b2440 !important}
+  .nx-join-btn.red{background:#c8101a;color:#fff !important}
+  .nx-join-sub{text-align:center;font-size:13px;margin:12px 0 0;color:#8a91a5}
+  .nx-join-card.seller .nx-join-sub{color:#aab2c5}
+  .nx-join-card.seller .nx-join-sub a{color:#fff;text-decoration:underline}
+  .nx-join-how{max-width:980px;margin:40px auto 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .nx-join-step{background:#f7f8fb;border-radius:14px;padding:18px}
+  .nx-join-step b{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#1b2440;color:#fff;font-size:14px;margin-bottom:10px}
+  .nx-join-step h3{font-size:15px;font-weight:700;margin:0 0 4px;color:#1b2440}
+  .nx-join-step p{font-size:13px;line-height:1.5;color:#5b6378;margin:0}
+  .nx-join-how-title{max-width:980px;margin:46px auto 0;font-size:20px;font-weight:800;text-align:center}
+  .nx-join-note{text-align:center;color:#8a91a5;font-size:13px;margin-top:26px}
+  @media (max-width:767px){
+    .nx-join{padding-top:18px}
+    .nx-join-head h1{font-size:26px}
+    .nx-join-grid{grid-template-columns:1fr;gap:16px}
+    .nx-join-card{padding:24px 20px}
+    .nx-join-how{grid-template-columns:1fr 1fr}
+  }
+</style>
+
+<div class="container nx-join">
+  {%- if customer -%}
+    <div class="nx-join-head">
+      <h1>You're signed in{% if customer.first_name != blank %}, {{ customer.first_name }}{% endif %}</h1>
+      <p>Where would you like to go?</p>
+    </div>
+    <div class="nx-join-grid">
+      <div class="nx-join-card">
+        <h2>My account</h2>
+        <p>See your orders, tracking and addresses.</p>
+        <a class="nx-join-btn dark" href="{{ routes.account_url }}" data-nx-direct>Go to my account</a>
+      </div>
+      <div class="nx-join-card seller">
+        <h2>Reseller Dashboard</h2>
+        <p>Import our products, set your prices and send us your orders.</p>
+        <a class="nx-join-btn light" href="{{ nx_dash }}">Open dashboard</a>
+      </div>
+    </div>
+  {%- else -%}
+    <div class="nx-join-head">
+      <h1>Welcome to Nexra LLC</h1>
+      <p>Log in or create your free account. Choose how you want to use Nexra.</p>
+    </div>
+
+    <div class="nx-join-grid">
+      <div class="nx-join-card">
+        <div class="nx-join-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1b2440" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <h2>Shop as a customer</h2>
+        <p>Buy for yourself, your home or as a gift.</p>
+        <ul class="nx-join-list">
+          <li>Fast checkout with saved addresses</li>
+          <li>Track every order in one place</li>
+          <li>Member-only deals and offers</li>
+        </ul>
+        <a class="nx-join-btn dark" href="{{ nx_login_customer }}" data-nx-direct>Log in / Sign up</a>
+        <p class="nx-join-sub">New here? Enter your email and we'll create your account.</p>
+      </div>
+
+      <div class="nx-join-card seller">
+        <span class="nx-join-tag">Earn money</span>
+        <div class="nx-join-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-1.5-5h-15z"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg>
+        </div>
+        <h2>Become a seller</h2>
+        <p>Sell our products in your own store. We ship to your customers.</p>
+        <ul class="nx-join-list">
+          <li>700+ ready-to-sell products</li>
+          <li>Import to Shopify, WooCommerce, eBay and Amazon</li>
+          <li>Set your own prices and keep the profit</li>
+          <li>Blind shipping in plain packaging, straight to your customer</li>
+        </ul>
+        <a class="nx-join-btn red" href="{{ nx_login_seller }}" data-nx-direct>Start selling</a>
+        <p class="nx-join-sub">Already a seller? <a href="{{ nx_login_seller }}" data-nx-direct>Log in to your dashboard</a> · <a href="/collections/nexra-reseller-plans">See plans</a></p>
+      </div>
+    </div>
+
+    <h2 class="nx-join-how-title">How selling with Nexra works</h2>
+    <div class="nx-join-how">
+      <div class="nx-join-step"><b>1</b><h3>Create your account</h3><p>Sign up with your email and pick a plan.</p></div>
+      <div class="nx-join-step"><b>2</b><h3>Import products</h3><p>Choose products and download the file for your store.</p></div>
+      <div class="nx-join-step"><b>3</b><h3>Sell at your price</h3><p>Add your markup. The profit is yours.</p></div>
+      <div class="nx-join-step"><b>4</b><h3>We deliver</h3><p>Send us the order and we ship to your customer.</p></div>
+    </div>
+    <p class="nx-join-note">You'll sign in securely with a one-time code sent to your email. No password needed.</p>
+  {%- endif -%}
+</div>
