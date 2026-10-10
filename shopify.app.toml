@@ -3,7 +3,7 @@
 # Replace YOUR-WORKER with the worker address printed by `npm run deploy`
 # (for example nexra-connect.yourname.workers.dev) and CLIENT_ID with the app's Client ID.
 
-client_id = "CLIENT_ID"
+client_id = "b9721439ab32d5045b1a8cdc4b5984f3"
 name = "Nexra Connect"
 application_url = "https://YOUR-WORKER/install"
 embedded = false

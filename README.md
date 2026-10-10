@@ -45,7 +45,7 @@ Put that address in `wrangler.toml` as `APP_URL` and run `npm run deploy` again.
 
 ### 3. Upload the app settings to Shopify
 Everything Shopify needs (URLs, scopes, app proxy, compliance webhooks) is in `shopify.app.toml`.
-1. In `shopify.app.toml`, replace `CLIENT_ID` with the app's Client ID and every `YOUR-WORKER` with your worker address (e.g. `nexra-connect.yourname.workers.dev`).
+1. In `shopify.app.toml`, replace every `YOUR-WORKER` with your worker address (e.g. `nexra-connect.yourname.workers.dev`).
 2. Run:
 ```bash
 npx @shopify/cli@latest app deploy      # log in with your Partner account when asked, choose "Nexra Connect"
