@@ -1,0 +1,26 @@
+# Seller app: installed on sellers' own Shopify stores (Distribution: Public, unlisted is fine).
+# Create it in the Dev Dashboard as a second app, put its Client ID below, then upload with:
+#   npx @shopify/cli@latest app deploy --config sellers
+# and save its keys on the worker as SELLER_API_KEY and SELLER_API_SECRET.
+
+client_id = "SELLER_APP_CLIENT_ID"
+name = "Nexra Connect for Sellers"
+application_url = "https://nexra-connect.nexrallc.workers.dev/install"
+embedded = false
+
+[access_scopes]
+scopes = "read_orders,read_products,write_products"
+use_legacy_install_flow = true
+
+[auth]
+redirect_urls = ["https://nexra-connect.nexrallc.workers.dev/auth/callback"]
+
+[webhooks]
+api_version = "2026-10"
+
+  [[webhooks.subscriptions]]
+  compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+  uri = "https://nexra-connect.nexrallc.workers.dev/webhooks/shopify"
+
+[pos]
+embedded = false

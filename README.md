@@ -68,9 +68,17 @@ The same settings, if you prefer to enter them by hand:
 ### 4. Install it on the Nexra store
 Open `https://nexra-connect.<you>.workers.dev/install?shop=h0vzt0-80.myshopify.com` while logged in to the Nexra admin and approve. This lets the app read products and customer plans, create draft orders, and subscribe to product changes.
 
-### 5. Let sellers install it
-- **WooCommerce** works right away.
-- **Shopify** stores can only install an app that is distributed. In the Partner dashboard choose **Distribution → Public distribution** (unlisted is fine) and submit for review. Until it is approved you can test with Shopify **development stores**.
+### 5. Choose distribution and let sellers install
+Shopify lets an app with **custom distribution** into one store only, and an app with **public distribution** into other stores only after review. So Nexra Connect uses two apps:
+
+| App | Distribution | Installed on | Keys on the worker |
+|---|---|---|---|
+| Nexra Connect (`shopify.app.toml`) | Custom → `h0vzt0-80.myshopify.com` | the Nexra store | `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET` |
+| Nexra Connect for Sellers (`shopify.app.sellers.toml`) | Public (unlisted is fine) | sellers' Shopify stores | `SELLER_API_KEY`, `SELLER_API_SECRET` |
+
+- **WooCommerce** sellers work as soon as the Nexra store app is installed.
+- Until the seller app's keys are on the worker, the dashboard tells sellers that Shopify connections are opening soon.
+- To add the seller app: create a second app in the Dev Dashboard, put its Client ID in `shopify.app.sellers.toml`, run `npx @shopify/cli@latest app deploy --config sellers`, save its keys on the worker, then in the Partner Dashboard choose **Public distribution** and submit it for review. Before approval it can be tested on development stores.
 
 ### 6. Publish the theme
 Publish the theme copy that contains the updated Seller Dashboard (Connected Stores, Push to store, Orders from your stores). Until steps 2–4 are done, the dashboard shows "being set up" and the CSV export files keep working.

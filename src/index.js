@@ -31,6 +31,20 @@ const html = (body, status = 200) =>
 
 const redirect = (url) => Response.redirect(url, 302);
 
+// Two Shopify apps. The Nexra store app (SHOPIFY_API_*, custom distribution) runs the app
+// proxy and reads the catalog; the seller app (SELLER_API_*, public distribution) connects
+// seller stores. Shopify only lets a custom-distribution app into the one store it was made for.
+const mainApp = (env) => ({ key: env.SHOPIFY_API_KEY, secret: env.SHOPIFY_API_SECRET });
+const sellerApp = (env) => (env.SELLER_API_KEY && env.SELLER_API_SECRET ? { key: env.SELLER_API_KEY, secret: env.SELLER_API_SECRET } : null);
+
+// Which app signed an OAuth/install request, or null if neither did.
+async function signingApp(requestUrl, env) {
+  for (const app of [mainApp(env), sellerApp(env)]) {
+    if (app && (await verifyOAuthQuery(requestUrl, app.secret))) return app;
+  }
+  return null;
+}
+
 function config(env) {
   for (const k of ['SHOPIFY_API_KEY', 'SHOPIFY_API_SECRET', 'ENCRYPTION_KEY', 'APP_URL', 'SUPPLIER_SHOP', 'STOREFRONT_URL']) {
     if (!env[k]) throw new Error(`Missing setting ${k}`);
@@ -89,6 +103,7 @@ async function handleProxy(request, env, db, url, path) {
       plan: { key: plan.key, name: plan.name, discount: plan.discount, perPush: plan.perPush, totalProducts: plan.totalProducts },
       productsUsed: await db.countDistinctProducts(customerId),
       connections: await db.listConnections(customerId),
+      shopifyConnect: !!sellerApp(env),
       maxPerRequest: MAX_PER_REQUEST,
     });
   }
@@ -98,8 +113,10 @@ async function handleProxy(request, env, db, url, path) {
     const shop = normalizeShop(body.shop);
     if (!shop) throw new UserError('Enter your Shopify store address, for example mystore.myshopify.com');
     if (shop === env.SUPPLIER_SHOP) throw new UserError('That is the Nexra store. Enter your own store address.');
-    const state = await signToken(env.SHOPIFY_API_SECRET, { k: 'seller', c: String(customerId), s: shop, n: randomId(8), exp: Date.now() + 15 * 60 * 1000 });
-    return json({ redirect: authorizeUrl({ shop, apiKey: env.SHOPIFY_API_KEY, scopes: SELLER_SCOPES, redirectUri: `${env.APP_URL}/auth/callback`, state }) });
+    const app = sellerApp(env);
+    if (!app) throw new UserError('Shopify store connections are opening soon. For now, connect a WooCommerce store or use the export files.');
+    const state = await signToken(app.secret, { k: 'seller', c: String(customerId), s: shop, n: randomId(8), exp: Date.now() + 15 * 60 * 1000 });
+    return json({ redirect: authorizeUrl({ shop, apiKey: app.key, scopes: SELLER_SCOPES, redirectUri: `${env.APP_URL}/auth/callback`, state }) });
   }
 
   if (path === '/api/connect/woo' && m === 'POST') {
@@ -152,7 +169,7 @@ async function handleProxy(request, env, db, url, path) {
 async function handleInstall(request, env, db, url) {
   const shop = normalizeShop(url.searchParams.get('shop'));
   if (!shop) return html('<h2>Nexra Connect</h2><p>Connect your store from your Nexra Seller Dashboard.</p>' + `<a class="b" href="${env.STOREFRONT_URL}/pages/reseller-dashboard#stores">Open Seller Dashboard</a>`);
-  if (url.searchParams.has('hmac') && !(await verifyOAuthQuery(request.url, env.SHOPIFY_API_SECRET))) return html('<h2>Invalid request</h2>', 401);
+  if (url.searchParams.has('hmac') && !(await signingApp(request.url, env))) return html('<h2>Invalid request</h2>', 401);
 
   if (shop === env.SUPPLIER_SHOP) {
     const state = await signToken(env.SHOPIFY_API_SECRET, { k: 'supplier', s: shop, n: randomId(8), exp: Date.now() + 15 * 60 * 1000 });
@@ -164,13 +181,14 @@ async function handleInstall(request, env, db, url) {
 }
 
 async function handleCallback(request, env, db, url) {
-  if (!(await verifyOAuthQuery(request.url, env.SHOPIFY_API_SECRET))) return html('<h2>Invalid request</h2><p>Please try connecting again.</p>', 401);
+  const app = await signingApp(request.url, env);
+  if (!app) return html('<h2>Invalid request</h2><p>Please try connecting again.</p>', 401);
   const shop = normalizeShop(url.searchParams.get('shop'));
-  const state = await verifyToken(env.SHOPIFY_API_SECRET, url.searchParams.get('state'));
+  const state = await verifyToken(app.secret, url.searchParams.get('state'));
   if (!shop || !state || state.s !== shop) {
     return html(`<h2>Link expired</h2><p>Please start again from your Nexra Seller Dashboard.</p><a class="b" href="${env.STOREFRONT_URL}/pages/reseller-dashboard#stores">Open Seller Dashboard</a>`, 400);
   }
-  const { token, scope } = await exchangeCode({ shop, apiKey: env.SHOPIFY_API_KEY, apiSecret: env.SHOPIFY_API_SECRET, code: url.searchParams.get('code') });
+  const { token, scope } = await exchangeCode({ shop, apiKey: app.key, apiSecret: app.secret, code: url.searchParams.get('code') });
   const gql = adminClient({ shop, token, apiVersion: env.API_VERSION });
   const hookUri = `${env.APP_URL}/webhooks/shopify`;
 
@@ -192,7 +210,10 @@ async function handleCallback(request, env, db, url) {
 
 async function handleShopifyWebhook(request, env, db, ctx) {
   const raw = await request.text();
-  if (!(await verifyWebhook(raw, request.headers.get('x-shopify-hmac-sha256'), env.SHOPIFY_API_SECRET))) return new Response('Unauthorized', { status: 401 });
+  const hmac = request.headers.get('x-shopify-hmac-sha256');
+  const seller = sellerApp(env);
+  const signed = (await verifyWebhook(raw, hmac, env.SHOPIFY_API_SECRET)) || (seller && (await verifyWebhook(raw, hmac, seller.secret)));
+  if (!signed) return new Response('Unauthorized', { status: 401 });
   const topic = request.headers.get('x-shopify-topic') || '';
   const shop = normalizeShop(request.headers.get('x-shopify-shop-domain'));
   let body = {};

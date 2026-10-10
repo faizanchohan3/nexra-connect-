@@ -3,7 +3,7 @@ import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import worker from '../src/index.js';
 import { makeDb } from '../src/db.js';
-import { d1, ENV, SECRET, proxyUrl, oauthUrl, webhookRequest, sourceProduct, fakeUpstream } from './helpers.js';
+import { d1, ENV, SECRET, SELLER_SECRET, proxyUrl, oauthUrl, webhookRequest, sourceProduct, fakeUpstream } from './helpers.js';
 import { hmacBase64 } from '../src/crypto.js';
 
 let env, up, realFetch;
@@ -37,8 +37,9 @@ async function connectShopifySeller(shop = 'seller-one.myshopify.com', customerI
   const { redirect } = await res.json();
   assert.ok(redirect.startsWith(`https://${shop}/admin/oauth/authorize?`));
   assert.ok(redirect.includes('scope=read_products%2Cwrite_products%2Cread_orders'));
+  assert.equal(new URL(redirect).searchParams.get('client_id'), ENV.SELLER_API_KEY); // seller stores install the public seller app
   const state = new URL(redirect).searchParams.get('state');
-  const cb = await call(new Request(await oauthUrl('/auth/callback', { shop, code: 'xyz', state, timestamp: '3' })));
+  const cb = await call(new Request(await oauthUrl('/auth/callback', { shop, code: 'xyz', state, timestamp: '3' }, SELLER_SECRET)));
   assert.equal(cb.status, 302);
   assert.equal(cb.headers.get('location'), 'https://nexrallc.com/pages/reseller-dashboard#stores');
   const status = await getJson('/api/status', { customerId });
@@ -179,9 +180,9 @@ test('seller orders are imported and sent to Nexra as a paid-on-invoice draft or
     line_items: [{ variant_id: Number(vlinks[1].target_variant_id), sku: vlinks[1].sku, quantity: 2, title: 'Product 401' }, { variant_id: 1, sku: 'NOT-OURS', quantity: 1 }],
   };
   const orderHeaders = { 'x-shopify-topic': 'orders/create', 'x-shopify-shop-domain': 'seller-one.myshopify.com' };
-  await call(await webhookRequest(`${ENV.APP_URL}/webhooks/shopify`, orderBody, orderHeaders));
+  await call(await webhookRequest(`${ENV.APP_URL}/webhooks/shopify`, orderBody, orderHeaders, SELLER_SECRET));
   // Shopify may deliver the same webhook twice; it must be imported once.
-  await call(await webhookRequest(`${ENV.APP_URL}/webhooks/shopify`, orderBody, orderHeaders));
+  await call(await webhookRequest(`${ENV.APP_URL}/webhooks/shopify`, orderBody, orderHeaders, SELLER_SECRET));
 
   const list = await getJson('/api/orders');
   assert.equal(list.orders.length, 1);
@@ -227,7 +228,7 @@ test('uninstalling the app from a seller store disconnects it', async () => {
   setup({ customerTags: ['nexra-pro'] });
   await installSupplier();
   await connectShopifySeller();
-  const hook = await webhookRequest(`${ENV.APP_URL}/webhooks/shopify`, {}, { 'x-shopify-topic': 'app/uninstalled', 'x-shopify-shop-domain': 'seller-one.myshopify.com' });
+  const hook = await webhookRequest(`${ENV.APP_URL}/webhooks/shopify`, {}, { 'x-shopify-topic': 'app/uninstalled', 'x-shopify-shop-domain': 'seller-one.myshopify.com' }, SELLER_SECRET);
   await call(hook);
   const status = await getJson('/api/status');
   assert.equal(status.connections.length, 0);
@@ -239,4 +240,23 @@ test('OAuth callback rejects forged or expired requests', async () => {
   assert.equal((await call(new Request(forged))).status, 401);
   const noState = await call(new Request(await oauthUrl('/auth/callback', { shop: 'x.myshopify.com', code: '1', state: 'bogus', timestamp: '1' })));
   assert.equal(noState.status, 400);
+});
+
+test('without the seller app configured, Shopify connections explain the alternative', async () => {
+  setup();
+  env = { ...env, SELLER_API_KEY: undefined, SELLER_API_SECRET: undefined };
+  await installSupplier();
+  assert.equal((await getJson('/api/status')).shopifyConnect, false);
+  const res = await postJson('/api/connect/shopify', { shop: 'seller-one.myshopify.com' });
+  assert.equal(res.status, 400);
+  assert.match((await res.json()).error, /WooCommerce/);
+});
+
+test('a callback signed by one app cannot use state issued for the other', async () => {
+  setup({ customerTags: ['nexra-pro'] });
+  await installSupplier();
+  const res = await postJson('/api/connect/shopify', { shop: 'seller-one.myshopify.com' });
+  const state = new URL((await res.json()).redirect).searchParams.get('state');
+  const cb = await call(new Request(await oauthUrl('/auth/callback', { shop: 'seller-one.myshopify.com', code: 'x', state, timestamp: '4' }, SECRET)));
+  assert.equal(cb.status, 400);
 });

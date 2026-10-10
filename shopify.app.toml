@@ -1,4 +1,5 @@
-# Shopify app configuration. Upload it with:
+# Nexra store app: installed only on the Nexra store (Distribution: Custom, h0vzt0-80.myshopify.com).
+# Runs the nexrallc.com/apps/nexra app proxy and reads the catalog. Upload with:
 #   npx @shopify/cli@latest app deploy
 
 client_id = "b9721439ab32d5045b1a8cdc4b5984f3"
@@ -7,9 +8,7 @@ application_url = "https://nexra-connect.nexrallc.workers.dev/install"
 embedded = false
 
 [access_scopes]
-# The app asks each store for its own scopes during install (see src/shopify.js);
-# this list is the union so Shopify's review sees everything the app can request.
-scopes = "read_customers,read_orders,read_products,write_draft_orders,write_products"
+scopes = "read_customers,read_orders,read_products,write_draft_orders"
 use_legacy_install_flow = true
 
 [auth]

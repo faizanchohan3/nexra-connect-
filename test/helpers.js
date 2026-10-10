@@ -23,9 +23,12 @@ export function d1() {
 }
 
 export const SECRET = 'test-app-secret';
+export const SELLER_SECRET = 'test-seller-app-secret';
 export const ENV = {
   SHOPIFY_API_KEY: 'test-key',
   SHOPIFY_API_SECRET: SECRET,
+  SELLER_API_KEY: 'test-seller-key',
+  SELLER_API_SECRET: SELLER_SECRET,
   ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
   APP_URL: 'https://connect.example.workers.dev',
   SUPPLIER_SHOP: 'nexra.myshopify.com',
@@ -40,9 +43,9 @@ export async function proxyUrl(path, { customerId = '42', shop = ENV.SUPPLIER_SH
   return `${ENV.APP_URL}/proxy${path}?${q}`;
 }
 
-export async function oauthUrl(path, params) {
+export async function oauthUrl(path, params, secret = SECRET) {
   const message = Object.keys(params).sort().map((k) => `${k}=${params[k]}`).join('&');
-  const q = new URLSearchParams({ ...params, hmac: await hmacHex(SECRET, message) });
+  const q = new URLSearchParams({ ...params, hmac: await hmacHex(secret, message) });
   return `${ENV.APP_URL}${path}?${q}`;
 }
 
