@@ -10,7 +10,7 @@
 {%- if nx_seller -%}
   {%- assign nx_return = '/pages/reseller-dashboard' -%}
 {%- else -%}
-  {%- assign nx_return = routes.account_url -%}
+  {%- assign nx_return = '/pages/my-account' -%}
 {%- endif -%}
 <style>
   .nxa{padding:30px 15px 70px;color:#1b2440}
@@ -78,7 +78,7 @@
       <div class="nxa-in">
         <h1>You're signed in{% if customer.first_name != blank %}, {{ customer.first_name }}{% endif %}</h1>
         <p class="nxa-sub">Where would you like to go?</p>
-        <a class="nxa-btn" href="{{ routes.account_url }}" data-nx-direct>My account</a>
+        <a class="nxa-btn" href="/pages/my-account" data-nx-direct>My account</a>
         <a class="nxa-btn red" href="/pages/reseller-dashboard">Reseller Dashboard</a>
       </div>
 

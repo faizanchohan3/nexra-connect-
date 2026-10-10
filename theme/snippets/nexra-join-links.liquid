@@ -1,7 +1,7 @@
 {%- comment -%}
   Nexra LLC account links (loaded on every page from snippets/oldIE-js.liquid).
   Logged out: Login / Register / Account links go to /pages/customer-login.
-  Logged in: the header account icon opens a menu with Seller Dashboard, My orders and Log out,
+  Logged in: the header account icon opens a menu with Seller Dashboard, My orders (/pages/my-account) and Log out,
   and the seller dashboard's top bar gets a Log out button.
   Links marked data-nx-direct are left alone.
 {%- endcomment -%}
@@ -37,7 +37,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   var DASH = '/pages/reseller-dashboard';
   var LOGOUT = {{ routes.account_logout_url | json }};
-  var ACCOUNT = {{ routes.account_url | json }};
   var NAME = {{ customer.first_name | default: customer.name | default: customer.email | json }};
   var EMAIL = {{ customer.email | json }};
   var onDash = location.pathname.indexOf(DASH) === 0;
@@ -70,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
   menu.innerHTML =
     '<div class="nx-hi"><b>Hi, ' + esc(NAME) + '</b>' + esc(EMAIL) + '</div>' +
     '<a class="nx-dash" href="' + DASH + '" data-nx-direct>' + ic.dash + 'Seller Dashboard</a>' +
-    '<a href="' + ACCOUNT + '" data-nx-direct>' + ic.bag + 'My orders &amp; account</a>' +
+    '<a href="/pages/my-account" data-nx-direct>' + ic.bag + 'My orders &amp; account</a>' +
     '<a class="nx-out" href="' + LOGOUT + '" data-nx-direct>' + ic.out + 'Log out</a>';
   document.body.appendChild(menu);
 

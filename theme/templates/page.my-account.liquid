@@ -1,0 +1,290 @@
+<!-- /templates/page.my-account.liquid — Nexra LLC "My account" page (/pages/my-account).
+     Orders, tracking and profile on nexrallc.com with the store header and footer.
+     Shopify's new customer accounts keep the secure profile editor and order detail pages on
+     shopify.com; this page links to them for edits and full order details. -->
+{% include 'breadcrumb' %}
+<style>
+  .nxm{padding:26px 15px 70px;color:#1b2440;max-width:1140px;margin:0 auto}
+  .nxm *{box-sizing:border-box}
+  .nxm a{text-decoration:none}
+  .nxm-hero{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,#1b2440 0%,#2b3a66 100%);color:#fff;border-radius:20px;padding:26px 30px;margin-bottom:22px;box-shadow:0 14px 40px rgba(20,30,60,.16)}
+  .nxm-av{width:62px;height:62px;border-radius:50%;background:#c8101a;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex:0 0 62px}
+  .nxm-hero h1{color:#fff;font-size:26px;font-weight:800;margin:0 0 4px}
+  .nxm-hero p{margin:0;color:#c9cfdd;font-size:14.5px}
+  .nxm-hero-x{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+  .nxm-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:11px;font-weight:700;font-size:14.5px;border:0;cursor:pointer;background:#fff;color:#1b2440 !important;transition:opacity .2s}
+  .nxm-btn:hover{opacity:.9}
+  .nxm-btn.red{background:#c8101a;color:#fff !important}
+  .nxm-btn.line{background:transparent;border:1.5px solid rgba(255,255,255,.35);color:#fff !important}
+  .nxm-btn.dark{background:#1b2440;color:#fff !important}
+  .nxm-btn.soft{background:#f2f4f8;color:#1b2440 !important}
+  .nxm-btn svg{width:17px;height:17px}
+  .nxm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .nxm-stat{background:#fff;border:1px solid #e3e6ee;border-radius:16px;padding:18px 20px}
+  .nxm-stat span{display:block;color:#5b6378;font-size:13px;font-weight:600;margin-bottom:6px}
+  .nxm-stat b{font-size:24px;font-weight:800}
+  .nxm-grid{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}
+  .nxm-card{background:#fff;border:1px solid #e3e6ee;border-radius:18px;padding:22px}
+  .nxm-card h2{font-size:19px;font-weight:800;margin:0 0 4px;color:#1b2440}
+  .nxm-card .sub{color:#5b6378;font-size:14px;margin:0 0 16px}
+  .nxm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .nxm-filter{display:flex;gap:6px;flex-wrap:wrap;background:#f2f4f8;border-radius:12px;padding:4px}
+  .nxm-filter button{border:0;background:transparent;border-radius:9px;padding:8px 13px;font-weight:700;font-size:13.5px;color:#5b6378;cursor:pointer}
+  .nxm-filter button.on{background:#fff;color:#1b2440;box-shadow:0 2px 8px rgba(20,30,60,.10)}
+  .nxm-order{border:1px solid #e3e6ee;border-radius:16px;padding:18px;margin-bottom:14px;transition:box-shadow .2s}
+  .nxm-order:hover{box-shadow:0 8px 24px rgba(20,30,60,.08)}
+  .nxm-otop{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .nxm-otop b{font-size:16.5px}
+  .nxm-otop small{display:block;color:#5b6378;font-size:13px;margin-top:2px}
+  .nxm-total{text-align:right;font-weight:800;font-size:17px}
+  .nxm-pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px}
+  .nxm-pill{display:inline-block;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700}
+  .nxm-pill.ok{background:#e7f6ee;color:#0a5c2f}
+  .nxm-pill.wait{background:#fff5df;color:#7a5200}
+  .nxm-pill.bad{background:#fdecee;color:#8a0d17}
+  .nxm-pill.info{background:#e9eefb;color:#23408f}
+  .nxm-items{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .nxm-item{display:flex;gap:10px;align-items:center;background:#f7f8fb;border-radius:12px;padding:8px 12px 8px 8px;max-width:100%}
+  .nxm-item img{width:48px;height:48px;object-fit:cover;border-radius:9px;background:#fff;flex:0 0 48px}
+  .nxm-item span{font-size:13.5px;font-weight:600;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-width:220px}
+  .nxm-item em{font-style:normal;color:#5b6378;font-weight:500;display:block;font-size:12.5px}
+  .nxm-more{align-self:center;color:#5b6378;font-size:13.5px;font-weight:600}
+  .nxm-track{display:grid;grid-template-columns:repeat(4,1fr);margin:4px 0 16px;position:relative}
+  .nxm-step{text-align:center;font-size:12.5px;font-weight:700;color:#9aa1b3;position:relative}
+  .nxm-step i{display:block;width:26px;height:26px;margin:0 auto 6px;border-radius:50%;background:#e3e6ee;position:relative;z-index:1;line-height:26px;color:#fff;font-style:normal;font-size:13px}
+  .nxm-step:before{content:"";position:absolute;top:12px;left:-50%;width:100%;height:3px;background:#e3e6ee}
+  .nxm-step:first-child:before{display:none}
+  .nxm-step.done{color:#1b2440}
+  .nxm-step.done i{background:#0f8a4b}
+  .nxm-step.done:before{background:#0f8a4b}
+  .nxm-oact{display:flex;gap:8px;flex-wrap:wrap}
+  .nxm-oact .nxm-btn{height:40px;font-size:13.5px;padding:0 14px}
+  .nxm-empty{text-align:center;padding:40px 20px}
+  .nxm-empty svg{width:56px;height:56px;color:#c3c8d4;margin-bottom:10px}
+  .nxm-empty h3{font-size:18px;font-weight:800;margin:0 0 6px}
+  .nxm-empty p{color:#5b6378;margin:0 0 18px}
+  .nxm-side .nxm-card{margin-bottom:18px}
+  .nxm-kv{font-size:14px;line-height:1.6;color:#33405f}
+  .nxm-kv b{display:block;color:#1b2440}
+  .nxm-links a{display:flex;align-items:center;gap:10px;padding:11px 4px;border-top:1px solid #eef0f5;color:#1b2440;font-weight:600;font-size:14.5px}
+  .nxm-links a:first-child{border-top:0}
+  .nxm-links a.out{color:#c8101a}
+  .nxm-links svg{width:18px;height:18px;flex:0 0 18px;color:#5b6378}
+  .nxm-links a.out svg{color:#c8101a}
+  .nxm-seller{background:linear-gradient(160deg,#1b2440 0%,#5a0f17 130%);color:#fff;border:0}
+  .nxm-seller h2{color:#fff}
+  .nxm-seller p{color:#d5d9e4;font-size:14px;margin:0 0 14px}
+  .nxm-pag{display:flex;justify-content:center;gap:6px;margin-top:10px;font-weight:700}
+  .nxm-pag a,.nxm-pag span{padding:8px 12px;border-radius:9px;background:#f2f4f8;color:#1b2440}
+  .nxm-pag .current{background:#1b2440;color:#fff}
+  .nxm-guest{max-width:520px;margin:20px auto;text-align:center}
+  .nxm-guest .nxm-btn{margin:6px}
+  .nxm-guest > svg{width:48px;height:48px;color:#c3c8d4}
+  @media (max-width:900px){
+    .nxm-grid{grid-template-columns:1fr}
+    .nxm-stats{grid-template-columns:repeat(2,1fr)}
+    .nxm-hero-x{margin-left:0;width:100%}
+  }
+  @media (max-width:520px){
+    .nxm-hero{padding:22px 20px}
+    .nxm-total{text-align:left}
+    .nxm-pills{justify-content:flex-start}
+    .nxm-step{font-size:11px}
+  }
+</style>
+
+{%- capture nx_ic_bag -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>{%- endcapture -%}
+{%- capture nx_ic_user -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>{%- endcapture -%}
+{%- capture nx_ic_dash -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>{%- endcapture -%}
+{%- capture nx_ic_out -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>{%- endcapture -%}
+{%- capture nx_ic_pin -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{%- endcapture -%}
+{%- capture nx_ic_help -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>{%- endcapture -%}
+{%- capture nx_ic_truck -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>{%- endcapture -%}
+
+<div class="nxm">
+{%- if customer -%}
+  {%- assign nx_plan = '' -%}
+  {%- if customer.tags contains 'nexra-pro' -%}{%- assign nx_plan = 'Pro' -%}
+  {%- elsif customer.tags contains 'nexra-growth' -%}{%- assign nx_plan = 'Growth' -%}
+  {%- elsif customer.tags contains 'nexra-starter' or customer.tags contains 'nexra-reseller' -%}{%- assign nx_plan = 'Starter' -%}
+  {%- elsif customer.tags contains 'nexra-seller' -%}{%- assign nx_plan = 'Free' -%}
+  {%- endif -%}
+  {%- assign nx_name = customer.first_name | default: customer.name | default: customer.email -%}
+
+  <div class="nxm-hero">
+    <div class="nxm-av">{{ nx_name | slice: 0 | upcase }}</div>
+    <div>
+      <h1>Hi, {{ nx_name }}</h1>
+      <p>{{ customer.email }}{% if nx_plan != '' %} · Seller · {{ nx_plan }} plan{% endif %}</p>
+    </div>
+    <div class="nxm-hero-x">
+      <a class="nxm-btn red" href="/collections/all">{{ nx_ic_bag }}Continue shopping</a>
+      <a class="nxm-btn line" href="{{ routes.account_logout_url }}" data-nx-direct>{{ nx_ic_out }}Log out</a>
+    </div>
+  </div>
+
+  {%- assign nx_open = 0 -%}{%- assign nx_shipped = 0 -%}
+  {%- for o in customer.orders limit: 50 -%}
+    {%- if o.cancelled -%}{%- continue -%}{%- endif -%}
+    {%- if o.fulfillment_status == 'fulfilled' -%}{%- assign nx_shipped = nx_shipped | plus: 1 -%}{%- else -%}{%- assign nx_open = nx_open | plus: 1 -%}{%- endif -%}
+  {%- endfor -%}
+  <div class="nxm-stats">
+    <div class="nxm-stat"><span>Orders</span><b>{{ customer.orders_count }}</b></div>
+    <div class="nxm-stat"><span>Being prepared</span><b>{{ nx_open }}</b></div>
+    <div class="nxm-stat"><span>Shipped</span><b>{{ nx_shipped }}</b></div>
+    <div class="nxm-stat"><span>Total spent</span><b>{{ customer.total_spent | money }}</b></div>
+  </div>
+
+  <div class="nxm-grid">
+    <div class="nxm-card" id="orders">
+      <div class="nxm-head">
+        <div>
+          <h2>My orders</h2>
+          <p class="sub" style="margin:0">Track, view and reorder your purchases.</p>
+        </div>
+        {%- if customer.orders_count > 0 -%}
+        <div class="nxm-filter" role="tablist">
+          <button class="on" data-f="all">All</button>
+          <button data-f="open">To ship</button>
+          <button data-f="shipped">Shipped</button>
+          <button data-f="cancelled">Cancelled</button>
+        </div>
+        {%- endif -%}
+      </div>
+
+      {%- paginate customer.orders by 10 -%}
+        {%- for order in customer.orders -%}
+          {%- assign nx_state = 'open' -%}
+          {%- if order.cancelled -%}{%- assign nx_state = 'cancelled' -%}
+          {%- elsif order.fulfillment_status == 'fulfilled' -%}{%- assign nx_state = 'shipped' -%}{%- endif -%}
+          {%- assign nx_paid = false -%}
+          {%- if order.financial_status == 'paid' or order.financial_status == 'partially_refunded' -%}{%- assign nx_paid = true -%}{%- endif -%}
+          {%- assign nx_track = '' -%}
+          {%- for li in order.line_items -%}
+            {%- if li.fulfillment.tracking_url != blank -%}{%- assign nx_track = li.fulfillment.tracking_url -%}{%- break -%}{%- endif -%}
+          {%- endfor -%}
+          <div class="nxm-order" data-s="{{ nx_state }}">
+            <div class="nxm-otop">
+              <div>
+                <b>Order {{ order.name }}</b>
+                <small>Placed {{ order.created_at | date: '%B %-d, %Y' }} · {{ order.item_count }} item{% if order.item_count != 1 %}s{% endif %}</small>
+              </div>
+              <div>
+                <div class="nxm-total">{{ order.total_price | money }}</div>
+                <div class="nxm-pills">
+                  {%- if order.cancelled -%}
+                    <span class="nxm-pill bad">Cancelled</span>
+                  {%- else -%}
+                    <span class="nxm-pill {% if nx_paid %}ok{% elsif order.financial_status contains 'refund' or order.financial_status == 'voided' %}bad{% else %}wait{% endif %}">{{ order.financial_status_label }}</span>
+                    <span class="nxm-pill {% if nx_state == 'shipped' %}ok{% else %}info{% endif %}">{{ order.fulfillment_status_label }}</span>
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
+
+            {%- unless order.cancelled -%}
+            <div class="nxm-track">
+              <div class="nxm-step done"><i>✓</i>Placed</div>
+              <div class="nxm-step{% if nx_paid %} done{% endif %}"><i>{% if nx_paid %}✓{% else %}2{% endif %}</i>Paid</div>
+              <div class="nxm-step{% if order.fulfillment_status == 'fulfilled' or order.fulfillment_status == 'partial' %} done{% endif %}"><i>{% if order.fulfillment_status == 'fulfilled' or order.fulfillment_status == 'partial' %}✓{% else %}3{% endif %}</i>Shipped</div>
+              <div class="nxm-step{% if nx_state == 'shipped' %} done{% endif %}"><i>{% if nx_state == 'shipped' %}✓{% else %}4{% endif %}</i>On the way</div>
+            </div>
+            {%- endunless -%}
+
+            <div class="nxm-items">
+              {%- for li in order.line_items limit: 3 -%}
+                <div class="nxm-item">
+                  {%- if li.image -%}<img src="{{ li.image | img_url: '96x96', crop: 'center' }}" alt="{{ li.title | escape }}" loading="lazy" width="48" height="48">{%- endif -%}
+                  <span>{{ li.product.title | default: li.title }}<em>Qty {{ li.quantity }}{% unless li.variant.title contains 'Default' or li.variant.title == blank %} · {{ li.variant.title }}{% endunless %}</em></span>
+                </div>
+              {%- endfor -%}
+              {%- if order.line_items.size > 3 -%}<div class="nxm-more">+{{ order.line_items.size | minus: 3 }} more</div>{%- endif -%}
+            </div>
+
+            <div class="nxm-oact">
+              <a class="nxm-btn dark" href="{{ order.customer_url }}" data-nx-direct>View order details</a>
+              {%- if nx_track != '' -%}<a class="nxm-btn soft" href="{{ nx_track }}" target="_blank" rel="noopener" data-nx-direct>{{ nx_ic_truck }}Track package</a>{%- endif -%}
+              <a class="nxm-btn soft" href="/cart/{% for li in order.line_items %}{% if li.variant.available %}{{ li.variant.id }}:{{ li.quantity }}{% unless forloop.last %},{% endunless %}{% endif %}{% endfor %}">Buy again</a>
+            </div>
+          </div>
+        {%- else -%}
+          <div class="nxm-empty">
+            {{ nx_ic_bag }}
+            <h3>No orders yet</h3>
+            <p>When you place an order, you can track it here.</p>
+            <a class="nxm-btn red" href="/collections/all">Start shopping</a>
+          </div>
+        {%- endfor -%}
+        <div class="nxm-empty" id="nxm-none" style="display:none"><h3>Nothing here</h3><p>No orders match this filter on this page.</p></div>
+        {%- if paginate.pages > 1 -%}
+          <div class="nxm-pag">{{ paginate | default_pagination: next: 'Next', previous: 'Previous' }}</div>
+        {%- endif -%}
+      {%- endpaginate -%}
+    </div>
+
+    <div class="nxm-side">
+      {%- if nx_plan != '' -%}
+      <div class="nxm-card nxm-seller">
+        <h2>Seller Dashboard</h2>
+        <p>{{ nx_plan }} plan · import products, push them to your stores and manage store orders.</p>
+        <a class="nxm-btn" href="/pages/reseller-dashboard" data-nx-direct>{{ nx_ic_dash }}Open dashboard</a>
+      </div>
+      {%- endif -%}
+
+      <div class="nxm-card">
+        <h2>Profile</h2>
+        <p class="sub">Your contact and delivery details.</p>
+        <div class="nxm-kv">
+          <b>{{ customer.name | default: nx_name }}</b>
+          {{ customer.email }}{% if customer.phone %}<br>{{ customer.phone }}{% endif %}
+        </div>
+        {%- if customer.default_address -%}
+          {%- assign a = customer.default_address -%}
+          <div class="nxm-kv" style="margin-top:14px">
+            <b>Default address</b>
+            {{ a.address1 }}{% if a.address2 != blank %}, {{ a.address2 }}{% endif %}<br>
+            {{ a.city }}{% if a.province_code != blank %}, {{ a.province_code }}{% endif %} {{ a.zip }}<br>
+            {{ a.country }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="nxm-card nxm-links">
+        <a href="{{ routes.account_url }}" data-nx-direct>{{ nx_ic_user }}Edit profile &amp; addresses</a>
+        <a href="{{ routes.account_url }}" data-nx-direct>{{ nx_ic_pin }}Saved addresses ({{ customer.addresses_count }})</a>
+        {%- if nx_plan == '' -%}<a href="/pages/seller-signup">{{ nx_ic_dash }}Become a seller</a>{%- endif -%}
+        <a href="/pages/contact">{{ nx_ic_help }}Help &amp; support</a>
+        <a class="out" href="{{ routes.account_logout_url }}" data-nx-direct>{{ nx_ic_out }}Log out</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var btns = document.querySelectorAll('.nxm-filter button');
+    var rows = document.querySelectorAll('.nxm-order');
+    var none = document.getElementById('nxm-none');
+    Array.prototype.forEach.call(btns, function (b) {
+      b.addEventListener('click', function () {
+        Array.prototype.forEach.call(btns, function (x) { x.classList.toggle('on', x === b); });
+        var f = b.getAttribute('data-f'), shown = 0;
+        Array.prototype.forEach.call(rows, function (r) {
+          var on = f === 'all' || r.getAttribute('data-s') === f;
+          r.style.display = on ? '' : 'none';
+          if (on) shown++;
+        });
+        if (none) none.style.display = shown ? 'none' : '';
+      });
+    });
+  })();
+  </script>
+{%- else -%}
+  <div class="nxm-card nxm-guest">
+    {{ nx_ic_user }}
+    <h2 style="margin-top:8px">Log in to see your orders</h2>
+    <p class="sub">Track orders, reorder favourites and manage your details.</p>
+    <a class="nxm-btn dark" href="/pages/customer-login">Log in</a>
+    <a class="nxm-btn soft" href="/pages/customer-signup">Create account</a>
+  </div>
+{%- endif -%}
+</div>
