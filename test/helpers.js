@@ -30,7 +30,7 @@ export const ENV = {
   APP_URL: 'https://connect.example.workers.dev',
   SUPPLIER_SHOP: 'nexra.myshopify.com',
   STOREFRONT_URL: 'https://nexrallc.com',
-  API_VERSION: '2025-07',
+  API_VERSION: '2026-10',
 };
 
 export async function proxyUrl(path, { customerId = '42', shop = ENV.SUPPLIER_SHOP, ts = Math.floor(Date.now() / 1000) } = {}) {

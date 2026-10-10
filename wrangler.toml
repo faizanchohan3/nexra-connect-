@@ -8,7 +8,7 @@ APP_URL = "https://nexra-connect.YOUR-SUBDOMAIN.workers.dev"
 # The Nexra store (supplier).
 SUPPLIER_SHOP = "h0vzt0-80.myshopify.com"
 STOREFRONT_URL = "https://nexrallc.com"
-API_VERSION = "2025-07"
+API_VERSION = "2026-10"
 
 # Secrets (set with `npx wrangler secret put NAME`, never commit them):
 #   SHOPIFY_API_KEY     Client ID from the Shopify Partner dashboard

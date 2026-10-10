@@ -18,7 +18,7 @@ use_legacy_install_flow = true
 redirect_urls = ["https://YOUR-WORKER/auth/callback"]
 
 [webhooks]
-api_version = "2025-07"
+api_version = "2026-10"
 
   [[webhooks.subscriptions]]
   compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]

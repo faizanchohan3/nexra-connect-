@@ -15,7 +15,7 @@ import {
   onSupplierProductUpdate, onSupplierProductDelete, onSellerOrder, sendOrderToNexra,
 } from './services.js';
 
-const DEFAULT_API_VERSION = '2025-07';
+const DEFAULT_API_VERSION = '2026-10';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
